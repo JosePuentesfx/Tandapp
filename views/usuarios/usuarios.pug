@@ -1,0 +1,310 @@
+include ../layout/header.pug
+include ../layout/navbar.pug
+include ../layout/sidebar.pug 
+
+
+
+block content
+  main(class="ml-0 pt-24 px-6 pb-8 min-h-screen bg-gray-50 md:ml-64")
+
+    //- ── HEADER ──────────────────────────────────────────
+    div(class="flex items-center justify-between mb-6")
+      div
+        p(class="text-sm text-gray-400 mt-1") Todos los participantes de tus tandas
+
+    //- ── STAT CARDS ──────────────────────────────────────
+    div(class="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-3")
+
+      div(class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4")
+        div(class="h-12 w-12 rounded-xl bg-emerald-500 flex items-center justify-center shrink-0")
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z")
+        div
+          p(class="text-sm text-gray-400 mb-1") Total Miembros
+          p(class="text-3xl font-bold text-gray-900")= totalMiembros
+          p(class="text-xs text-gray-400") En todas las tandas
+
+      div(class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4")
+        div(class="h-12 w-12 rounded-xl bg-slate-900 flex items-center justify-center shrink-0")
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2")
+        div
+          p(class="text-sm text-gray-400 mb-1") Tandas con miembros
+          p(class="text-3xl font-bold text-gray-900")= totalTandas
+          p(class="text-xs text-gray-400") Tandas activas
+
+      div(class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4")
+        div(class="h-12 w-12 rounded-xl bg-amber-400 flex items-center justify-center shrink-0")
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z")
+        div
+          p(class="text-sm text-gray-400 mb-1") Con pagos pendientes
+          p(class="text-3xl font-bold text-gray-900")= totalPendientes
+          p(class="text-xs text-gray-400") Requieren seguimiento
+
+    //- ── FLASH MESSAGES ──────────────────────────────────
+    if success && success.length
+      div(class="bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-xl px-4 py-3 mb-4")= success
+    if error && error.length
+      div(class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 mb-4")= error
+
+    //- ── TABLE ───────────────────────────────────────────
+    div(class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-visible")
+
+      //- Search bar inside card header
+      div(class="px-6 py-4 border-b border-gray-100 flex items-center justify-between")
+        h2(class="text-base font-semibold text-gray-800") Lista de Miembros
+        div(class="relative")
+          span(class="absolute inset-y-0 left-3 flex items-center pointer-events-none")
+            svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z")
+          input#searchInput(
+            type="text"
+            placeholder="Buscar miembro..."
+            class="pl-9 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent w-52"
+          )
+
+      if miembros && miembros.length
+
+        div(class="overflow-x-auto")
+          table(class="w-full text-sm" id="miembrosTable")
+            thead
+              tr(class="border-b border-gray-100 bg-gray-50")
+                th(class="text-left px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider") Miembro
+                th(class="text-left px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider") Contacto
+                th(class="text-left px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider") Tanda
+                th(class="text-left px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider") Turno
+                th(class="text-left px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider") Total pagado
+                th(class="text-left px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider") Pendiente
+                th(class="px-6 py-4")
+
+            tbody(class="divide-y divide-gray-50")
+              each miembro in miembros
+                //- Build initials: first letter of each word, max 2
+                - const words = miembro.nombre.trim().split(' ').filter(w => w.length > 0)
+                - const initials = words.length >= 2 ? words[0][0].toUpperCase() + words[1][0].toUpperCase() : words[0][0].toUpperCase()
+
+                tr(class="hover:bg-gray-50 transition-colors" data-nombre=miembro.nombre.toLowerCase())
+
+                  //- Nombre + initials avatar
+                  td(class="px-6 py-4")
+                    div(class="flex items-center gap-3")
+                      div(class="h-9 w-9 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center justify-center shrink-0")= initials
+                      div
+                        p(class="font-semibold text-gray-800")= miembro.nombre
+                        if miembro.notas
+                          p(class="text-xs text-gray-400 mt-0.5")= miembro.notas
+
+                  //- Contacto
+                  td(class="px-6 py-4 text-gray-500")
+                    if miembro.telefono
+                      span= miembro.telefono
+                    else
+                      span(class="text-gray-300") —
+
+                  //- Tanda badge
+                  td(class="px-6 py-4")
+                    span(class="bg-gray-100 text-gray-600 text-xs font-medium px-2 py-1 rounded-lg")= miembro.tanda_nombre
+
+                  //- Turno
+                  td(class="px-6 py-4")
+                    span(class="text-gray-500 font-medium") ##{miembro.numero_turno || '—'}
+
+                  //- Total pagado
+                  td(class="px-6 py-4 font-semibold text-gray-800") $#{Number(miembro.total_pagado).toLocaleString('es-MX')}
+
+                  //- Pendiente
+                  td(class="px-6 py-4")
+                    if miembro.total_pendiente > 0
+                      span(class="font-semibold text-amber-500") $#{Number(miembro.total_pendiente).toLocaleString('es-MX')}
+                    else
+                      span(class="text-gray-300") —
+
+                  //- Actions dropdown (same pattern as tandas page)
+                  td(class="px-6 py-4 text-right")
+                    div(class="relative inline-block")
+                      button(
+                        type="button"
+                        onclick=`toggleMenu(event, 'mmenu-${miembro.id}')`
+                        class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                      )
+                        svg(xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                          path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z")
+
+                      div(class="hidden fixed w-44 bg-white rounded-xl shadow-xl border border-gray-100 z-50 py-1" id=`mmenu-${miembro.id}`)
+
+                        //- Ver tanda → detalles page
+                        a(href=`/tandas/${miembro.tanda_id}` class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors")
+                          svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z")
+                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z")
+                          | Ver tanda
+
+                        //- Edit member
+                        button(
+                          type="button"
+                          data-id=miembro.id
+                          data-tanda-id=miembro.tanda_id
+                          data-nombre=miembro.nombre
+                          data-telefono=(miembro.telefono || '')
+                          data-notas=(miembro.notas || '')
+                          onclick="openEditModal(this)"
+                          class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors w-full text-left"
+                        )
+                          svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z")
+                          | Editar
+
+                        //- Removed Delete button
+
+
+      //- Empty state
+      else
+        div(class="flex flex-col items-center justify-center py-20 text-center")
+          div(class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-4")
+            svg(xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z")
+          p(class="text-gray-500 font-medium") No hay miembros aún
+          p(class="text-gray-400 text-sm mt-1") Crea una tanda y agrega miembros para verlos aquí
+          a(href="/tandas/nueva" class="mt-4 inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors")
+            | Crear tanda
+
+  //- ── EDIT MODAL ──────────────────────────────────────
+  div(id="editMemberModal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4")
+    div(onclick="closeEditModal()" class="absolute inset-0 bg-black/40 backdrop-blur-sm")
+    div(class="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-8 z-10")
+
+      div(class="flex items-center justify-between mb-6")
+        div
+          h2(class="text-lg font-bold text-gray-900") Editar Miembro
+          p(class="text-sm text-gray-400 mt-1") Actualiza la información del miembro
+        button(type="button" onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 transition-colors")
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12")
+
+      form(id="editMemberForm" method="POST" class="flex flex-col gap-4")
+        input(type="hidden" name="_csrf" value=csrfToken)
+
+        div(class="flex flex-col gap-1")
+          label(for="em-nombre" class="text-sm font-semibold text-gray-700") Nombre
+          input(
+            type="text"
+            id="em-nombre"
+            name="nombre"
+            required
+            class="border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+          )
+
+        div(class="flex flex-col gap-1")
+          label(for="em-telefono" class="text-sm font-semibold text-gray-700")
+            | Teléfono
+            span(class="text-gray-400 font-normal ml-1") (opcional)
+          input(
+            type="tel"
+            id="em-telefono"
+            name="telefono"
+            placeholder="xxx-xxx-xxxx"
+            pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+            title="Formato válido: xxx-xxx-xxxx"
+            maxlength="12"
+            class="border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+          )
+
+        div(class="flex flex-col gap-1")
+          label(for="em-notas" class="text-sm font-semibold text-gray-700")
+            | Notas
+            span(class="text-gray-400 font-normal ml-1") (opcional)
+          input(
+            type="text"
+            id="em-notas"
+            name="notas"
+            class="border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+          )
+
+        div(class="flex items-center justify-end gap-3 pt-2")
+          button(type="button" onclick="closeEditModal()" class="text-sm text-gray-400 hover:text-gray-600 px-4 py-2") Cancelar
+          button(type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-6 py-2 rounded-xl transition-colors") Guardar
+
+block scripts
+  script.
+    // ── DROPDOWN — fixed position so it's never clipped ──
+    function toggleMenu(event, id) {
+      event.stopPropagation()
+      const btn = event.currentTarget
+      const rect = btn.getBoundingClientRect()
+      const menu = document.getElementById(id)
+
+      document.querySelectorAll('[id^="mmenu-"]').forEach(m => {
+        if (m.id !== id) m.classList.add('hidden')
+      })
+
+      if (menu.classList.contains('hidden')) {
+        menu.style.top = (rect.bottom + window.scrollY + 4) + 'px'
+        menu.style.left = (rect.right + window.scrollX - 176) + 'px'
+        menu.classList.remove('hidden')
+      } else {
+        menu.classList.add('hidden')
+      }
+    }
+
+    document.addEventListener('click', () => {
+      document.querySelectorAll('[id^="mmenu-"]').forEach(m => m.classList.add('hidden'))
+    })
+
+    window.addEventListener('scroll', () => {
+      document.querySelectorAll('[id^="mmenu-"]').forEach(m => m.classList.add('hidden'))
+    })
+
+    // ── SEARCH ───────────────────────────────────────────
+    document.getElementById('searchInput').addEventListener('input', function() {
+      const search = this.value.toLowerCase()
+      document.querySelectorAll('#miembrosTable tbody tr').forEach(row => {
+        const nombre = row.dataset.nombre || ''
+        row.style.display = nombre.includes(search) ? '' : 'none'
+      })
+    })
+
+    // ── EDIT MODAL ────────────────────────────────────────
+    function openEditModal(btn) {
+      const id = btn.dataset.id;
+      const tandaId = btn.dataset.tandaId;
+      const nombre = btn.dataset.nombre;
+      const telefono = btn.dataset.telefono;
+      const notas = btn.dataset.notas;
+      document.getElementById('editMemberForm').action = `/tandas/${tandaId}/miembros/${id}/editar`
+      document.getElementById('em-nombre').value = nombre
+      document.getElementById('em-telefono').value = telefono
+      document.getElementById('em-notas').value = notas
+      document.getElementById('editMemberModal').classList.remove('hidden')
+      document.body.style.overflow = 'hidden'
+      document.querySelectorAll('[id^="mmenu-"]').forEach(m => m.classList.add('hidden'))
+      setTimeout(() => document.getElementById('em-nombre').focus(), 100)
+    }
+
+    function closeEditModal() {
+      document.getElementById('editMemberModal').classList.add('hidden')
+      document.body.style.overflow = ''
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeEditModal()
+    })
+
+    // ── PHONE FORMATTING ─────────────────────────────────
+    document.querySelectorAll('input[type="tel"]').forEach(input => {
+      input.addEventListener('input', function(e) {
+            let cleaned = e.target.value.replace(/[^0-9]/g, '');
+        let match = cleaned.match(/^([0-9]{0,3})([0-9]{0,3})([0-9]{0,4})/);
+        if (match) {
+          e.target.value = !match[2] ? match[1] : match[1] + '-' + match[2] + (match[3] ? '-' + match[3] : '');
+        } else {
+          e.target.value = cleaned;
+        }
+      });
+      // Evitar que ingrese letras
+      input.addEventListener('keypress', function(e) {
+        if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Tab' && e.key !== 'Delete' && !e.ctrlKey && !e.metaKey && e.key.length === 1) {
+          e.preventDefault();
+        }
+      }); 
+    });

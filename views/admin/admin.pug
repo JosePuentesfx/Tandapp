@@ -1,0 +1,131 @@
+include ../layout/header.pug
+include ../layout/sidebaradmin.pug 
+block content
+  main.min-h-screen.bg-gray-50(class="ml-0 md:ml-64 pt-24 px-6 pb-8")
+
+    //- ── HEADER ─────────────────────────────────────────
+    .flex.items-center.justify-between.mb-6
+      div
+        .flex.items-center.gap-2.mb-1
+          span.text-xs.font-semibold.px-2.py-1.rounded-full(style="background:#fef3c7; color:#92400e") Panel Admin
+          span.text-xs.text-gray-400 Solo visible para administradores
+        h1.text-2xl.font-bold.text-gray-900 Panel de Administración
+        p.text-sm.text-gray-500.mt-1 Vista general del sistema TandaApp
+
+    //- ── STAT CARDS ─────────────────────────────────────
+    .grid.grid-cols-1.gap-4.mb-6(class="sm:grid-cols-2 xl:grid-cols-4")
+
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-6.flex.items-center.gap-4
+        .h-12.w-12.rounded-xl.flex.items-center.justify-center.shrink-0(style="background:#1a7a4a")
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z")
+        div
+          p.text-sm.text-gray-500.mb-1 Total Usuarios
+          p.text-3xl.font-bold.text-gray-900= stats.totalUsuarios || 0
+
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-6.flex.items-center.gap-4
+        .h-12.w-12.rounded-xl.bg-emerald-500.flex.items-center.justify-center.shrink-0
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z")
+        div
+          p.text-sm.text-gray-500.mb-1 Usuarios Activos
+          p.text-3xl.font-bold.text-gray-900= stats.usuariosActivos || 0
+
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-6.flex.items-center.gap-4
+        .h-12.w-12.rounded-xl.bg-amber-400.flex.items-center.justify-center.shrink-0
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z")
+        div
+          p.text-sm.text-gray-500.mb-1 Tandas en Sistema
+          p.text-3xl.font-bold.text-gray-900= stats.totalTandas || 0
+
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-6.flex.items-center.gap-4
+        .h-12.w-12.rounded-xl.bg-red-400.flex.items-center.justify-center.shrink-0
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636")
+        div
+          p.text-sm.text-gray-500.mb-1 Usuarios Inactivos
+          p.text-3xl.font-bold.text-gray-900= stats.usuariosInactivos || 0
+
+    //- ── BOTTOM GRID ─────────────────────────────────────
+    .grid.grid-cols-1.gap-6(class="lg:grid-cols-3")
+
+      //- Usuarios recientes
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-6(class="lg:col-span-2")
+        .flex.items-center.justify-between.mb-5
+          h2.text-base.font-semibold.text-gray-900 Usuarios Recientes
+          a(href="/admin/usuarios" class="text-sm text-emerald-600 flex items-center gap-1 hover:underline")
+            | Ver todos
+            svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7")
+
+        if usuarios && usuarios.length
+          .flex.flex-col.gap-2
+            each u in usuarios
+              .flex.items-center.gap-3.p-3.rounded-xl(style="border: 1px solid #f3f4f6" class="hover:bg-gray-50 transition-colors")
+                //- Avatar
+                .h-9.w-9.rounded-xl.flex.items-center.justify-center.text-sm.font-bold.shrink-0(
+                  style=`background: ${u.activo ? '#dcfce7' : '#f3f4f6'}; color: ${u.activo ? '#16a34a' : '#9ca3af'}`
+                )= (u.nombre.charAt(0) + u.apellido.charAt(0)).toUpperCase()
+                div.flex-1.min-w-0
+                  p.text-sm.font-semibold.text-gray-800= `${u.nombre} ${u.apellido}`
+                  p.text-xs.text-gray-400.truncate= u.email
+                .flex.items-center.gap-2.shrink-0
+                  span(
+                    class=`text-xs font-medium px-2 py-1 rounded-full ${u.rol === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'}`
+                  )= u.rol
+                  if u.activo
+                    span.text-xs.font-medium.px-2.py-1.rounded-full(style="background:#dcfce7; color:#166534") Activo
+                  else
+                    span.text-xs.font-medium.px-2.py-1.rounded-full(style="background:#fee2e2; color:#991b1b") Inactivo
+        else
+          p.text-sm.text-gray-400.text-center.py-8 No hay usuarios registrados
+
+      //- Stats desglose
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-6
+        h2.text-base.font-semibold.text-gray-900.mb-5 Resumen del Sistema
+
+        .flex.flex-col.gap-3
+          //- Organizadores vs Admins
+          div
+            .flex.justify-between.text-xs.text-gray-500.mb-1
+              span Organizadores
+              span= stats.totalOrganizadores || 0
+            .w-full.rounded-full(style="height:6px; background:#e5e7eb")
+              .rounded-full(style=`height:6px; background:#10b981; width:${stats.totalUsuarios ? Math.round((stats.totalOrganizadores||0)/stats.totalUsuarios*100) : 0}%`)
+
+          div
+            .flex.justify-between.text-xs.text-gray-500.mb-1
+              span Administradores
+              span= stats.totalAdmins || 0
+            .w-full.rounded-full(style="height:6px; background:#e5e7eb")
+              .rounded-full(style=`height:6px; background:#8b5cf6; width:${stats.totalUsuarios ? Math.round((stats.totalAdmins||0)/stats.totalUsuarios*100) : 0}%`)
+
+          div
+            .flex.justify-between.text-xs.text-gray-500.mb-1
+              span Usuarios activos
+              span= stats.usuariosActivos || 0
+            .w-full.rounded-full(style="height:6px; background:#e5e7eb")
+              .rounded-full(style=`height:6px; background:#3b82f6; width:${stats.totalUsuarios ? Math.round((stats.usuariosActivos||0)/stats.totalUsuarios*100) : 0}%`)
+
+          div(style="border-top:1px solid #f3f4f6; padding-top:12px; margin-top:4px")
+            .flex.justify-between.text-xs.text-gray-500.mb-1
+              span Tandas activas
+              span= stats.tandasActivas || 0
+            .w-full.rounded-full(style="height:6px; background:#e5e7eb")
+              .rounded-full(style=`height:6px; background:#1a7a4a; width:${stats.totalTandas ? Math.round((stats.tandasActivas||0)/stats.totalTandas*100) : 0}%`)
+
+          div
+            .flex.justify-between.text-xs.text-gray-500.mb-1
+              span Total miembros en tandas
+              span= stats.totalMiembros || 0
+            .flex.justify-between.text-xs.text-gray-500.mb-1
+              span Total pagos registrados
+              span= stats.totalPagos || 0
+
+          //- Registro más reciente
+          if stats.ultimoRegistro
+            div(style="border-top:1px solid #f3f4f6; padding-top:12px; margin-top:4px")
+              p.text-xs.text-gray-400 Último registro
+              p.text-sm.font-semibold.text-gray-700.mt-1= `${stats.ultimoRegistro.nombre} ${stats.ultimoRegistro.apellido}`
+              p.text-xs.text-gray-400= new Date(stats.ultimoRegistro.created_at).toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' })

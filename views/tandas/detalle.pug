@@ -1,0 +1,378 @@
+include ../layout/header.pug
+include ../layout/navbar.pug
+include ../layout/sidebar.pug 
+
+
+
+
+block content
+  main(class="ml-0 pt-20 px-6 pb-8 min-h-screen bg-gray-50 md:ml-64")
+
+    //- ── FLASH MESSAGES ──────────────────────────────────
+    if success && success.length
+      div(class="bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-xl px-4 py-3 mb-4")= success
+    if error && error.length
+      div(class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 mb-4")= error
+
+    //- ── HEADER ──────────────────────────────────────────
+    div(class="flex items-start justify-between mb-6")
+      div(class="flex items-start gap-4")
+        a(href="/tandas" class="mt-1 text-gray-400 hover:text-gray-600 transition-colors")
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7")
+        div
+          div(class="flex items-center gap-3 flex-wrap")
+            h1(class="text-2xl font-bold text-gray-900")= tanda.nombre
+            - const estadoBadge = tanda.estado === 'activa' ? 'bg-emerald-100 text-emerald-700' : tanda.estado === 'pausada' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-500'
+            span(class=`px-2 py-0.5 rounded-full text-xs font-semibold ${estadoBadge}`)
+              = tanda.estado.charAt(0).toUpperCase() + tanda.estado.slice(1)
+          p(class="text-sm text-gray-400 mt-1")
+            = tanda.frecuencia.charAt(0).toUpperCase() + tanda.frecuencia.slice(1)
+            |  · $#{Number(tanda.monto_aportacion).toLocaleString('es-MX')} por persona
+            if tanda.descripcion
+              |  · #{tanda.descripcion}
+
+      //- Action buttons
+      div(class="flex items-center gap-2 flex-shrink-0")
+        //- Edit — only passes nombre and descripcion
+        button(
+          type="button"
+          data-id=tanda.id
+          data-nombre=tanda.nombre
+          data-descripcion=(tanda.descripcion || '')
+          onclick="openEditModal(this)"
+          class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 border border-gray-200 hover:border-gray-300 px-3 py-2 rounded-xl transition-all"
+        )
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z")
+          | Editar
+
+        //- Add member (only if tanda not full)
+        if miembros.length < tanda.total_miembros
+          button(
+            type="button"
+            onclick="openAddMemberModal()"
+            class="inline-flex items-center gap-1 text-sm font-semibold text-white bg-emerald-500 hover:bg-emerald-600 px-3 py-2 rounded-xl transition-colors"
+          )
+            svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4")
+            | Agregar Miembro
+
+        //- Delete
+        form(action=`/tandas/${tanda.id}/delete` method="POST" onsubmit="return confirm('¿Eliminar esta tanda? Esta acción no se puede deshacer.')")
+          button(type="submit" class="inline-flex items-center gap-1 text-sm text-red-400 hover:text-red-600 border border-gray-200 hover:border-red-200 px-3 py-2 rounded-xl transition-all")
+            svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16")
+            | Eliminar
+
+    //- ── PROGRESS BAR ────────────────────────────────────
+    - const rondasCompletadas = rondas.filter(r => r.estado === 'completada').length
+    - const totalRondas = rondas.length
+    - const proximaRonda = rondas.find(r => r.estado === 'pendiente')
+    - const diasFrecuencia = tanda.frecuencia === 'semanal' ? 7 : tanda.frecuencia === 'quincenal' ? 14 : 30
+    - const duracionTotal = diasFrecuencia * tanda.total_miembros
+    - const fechaInicio = tanda.fecha_inicio ? new Date(tanda.fecha_inicio) : null
+    - const fechaFin = fechaInicio ? new Date(fechaInicio.getTime() + duracionTotal * 86400000) : null
+    - const hoy = new Date()
+    - const progreso = fechaInicio ? Math.min(100, Math.max(0, Math.round((hoy - fechaInicio) / (fechaFin - fechaInicio) * 100))) : 0
+
+    div(class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6")
+      div(class="flex items-center justify-between mb-3")
+        span(class="text-sm font-semibold text-gray-600") Progreso de la tanda
+        span(class="text-sm text-gray-400")
+          span(class="font-semibold text-gray-700") #{progreso}%
+          |  · #{rondasCompletadas}/#{totalRondas} rondas completadas
+      div(class="w-full bg-gray-100 rounded-full h-3 mb-3")
+        div(class="h-3 rounded-full bg-emerald-500 transition-all" style=`width:${progreso}%`)
+      div(class="flex items-center justify-between text-xs text-gray-400")
+        span
+          | 📅 Inicio: #{fechaInicio ? fechaInicio.toLocaleDateString('es-MX', {day:'numeric', month:'short', year:'numeric'}) : '—'}
+        if proximaRonda
+          span
+            | ⏰ Próximo pago: #{new Date(proximaRonda.fecha_pago).toLocaleDateString('es-MX', {day:'numeric', month:'short', year:'numeric'})}
+        else if rondasCompletadas === totalRondas && totalRondas > 0
+          span(class="text-emerald-500") ✅ Tanda finalizada
+        if fechaFin
+          span
+            | 🏁 Fin estimado: #{fechaFin.toLocaleDateString('es-MX', {day:'numeric', month:'short', year:'numeric'})}
+
+    //- ── STAT CARDS ──────────────────────────────────────
+    - const montoTotal = summary ? Number(summary.total_cobrado || 0) : 0
+    - const pendientes = summary ? Number(summary.pendientes || 0) : 0
+    - const faltantes = summary ? Number(summary.faltantes || 0) : 0
+
+    div(class="grid grid-cols-2 gap-4 mb-6 lg:grid-cols-4")
+
+      div(class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex items-center gap-4")
+        div(class="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center flex-shrink-0")
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z")
+        div
+          p(class="text-xs text-gray-400 mb-0.5") Miembros
+          p(class="text-2xl font-bold text-gray-900") #{miembros.length}/#{tanda.total_miembros}
+
+      div(class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex items-center gap-4")
+        div(class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center flex-shrink-0")
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z")
+        div
+          p(class="text-xs text-gray-400 mb-0.5") Cobrado
+          p(class="text-2xl font-bold text-gray-900") $#{montoTotal.toLocaleString('es-MX')}
+
+      div(class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex items-center gap-4")
+        div(class="w-10 h-10 rounded-xl bg-amber-400 flex items-center justify-center flex-shrink-0")
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z")
+        div
+          p(class="text-xs text-gray-400 mb-0.5") Pendientes
+          p(class="text-2xl font-bold text-gray-900")= pendientes
+
+      div(class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex items-center gap-4")
+        div(class="w-10 h-10 rounded-xl bg-red-400 flex items-center justify-center flex-shrink-0")
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z")
+        div
+          p(class="text-xs text-gray-400 mb-0.5") Faltantes
+          p(class="text-2xl font-bold text-gray-900")= faltantes
+
+    //- ── MAIN CONTENT GRID ───────────────────────────────
+    div(class="grid grid-cols-1 gap-6 lg:grid-cols-3")
+
+      //- ── PAYMENT TRACKING TABLE ───────────────────────
+      div(class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden")
+        div(class="px-6 py-4 border-b border-gray-100 flex items-center justify-between")
+          h2(class="text-base font-semibold text-gray-800") Seguimiento de Pagos
+          //- Legend
+          div(class="flex items-center gap-4 text-xs text-gray-400")
+            div(class="flex items-center gap-1")
+              span(class="w-3 h-3 rounded-full bg-emerald-500 inline-block")
+              | Pagado
+            div(class="flex items-center gap-1")
+              span(class="w-3 h-3 rounded-full bg-amber-400 inline-block")
+              | Pendiente
+            div(class="flex items-center gap-1")
+              span(class="w-3 h-3 rounded-full bg-red-400 inline-block")
+              | Faltante
+            div(class="flex items-center gap-1")
+              span(class="w-3 h-3 rounded-full bg-gray-200 inline-block")
+              | Por pagar
+
+        if miembros.length === 0
+          div(class="flex flex-col items-center justify-center py-16 text-center")
+            p(class="text-gray-400 text-sm") No hay miembros en esta tanda aún
+            a(href=`/tandas/${tanda.id}/miembros` class="mt-2 text-emerald-600 text-sm font-medium hover:underline") Agregar miembros
+
+        else if rondas.length === 0
+          div(class="flex flex-col items-center justify-center py-16 text-center")
+            p(class="text-gray-400 text-sm") El calendario de pagos aún no ha sido generado
+            a(href=`/tandas/${tanda.id}/turnos` class="mt-2 text-emerald-600 text-sm font-medium hover:underline") Generar calendario
+
+        else
+          div(class="overflow-x-auto")
+            table(class="w-full text-xs")
+              thead
+                tr(class="border-b border-gray-100 bg-gray-50")
+                  th(class="text-left px-4 py-3 text-gray-400 font-medium sticky left-0 bg-gray-50") Miembro
+                  th(class="text-left px-3 py-3 text-gray-400 font-medium") Teléfono
+                  th(class="text-center px-3 py-3 text-gray-400 font-medium") Turno
+                  each ronda in rondas
+                    th(class="text-center px-2 py-3 text-gray-400 font-medium min-w-8") R#{ronda.numero_ronda}
+
+              tbody(class="divide-y divide-gray-50")
+                each miembro in miembros
+                  tr(class="hover:bg-gray-50 transition-colors")
+                    td(class="px-4 py-3 sticky left-0 bg-white")
+                      div(class="flex items-center gap-2")
+                        div(class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center justify-center flex-shrink-0")
+                          = miembro.nombre.charAt(0).toUpperCase()
+                        span(class="font-medium text-gray-800 whitespace-nowrap")= miembro.nombre
+                    td(class="px-3 py-3 text-gray-400 whitespace-nowrap")= miembro.telefono || '—'
+                    td(class="px-3 py-3 text-center")
+                      span(class="text-gray-500 font-medium") ##{miembro.numero_turno}
+
+                    //- Payment dots per ronda
+                    each ronda in rondas
+                      - const pago = pagos.find(p => p.miembro_id === miembro.id && p.ronda_id === ronda.id)
+                      - const esRondaRecibidora = ronda.miembro_id === miembro.id
+                      td(class="px-2 py-3 text-center")
+                        if esRondaRecibidora
+                          //- This member RECEIVES this ronda — show crown
+                          div(class="flex justify-center")
+                            span(title="Este miembro recibe esta ronda" class="text-base") 👑
+                        else if !pago
+                          //- No payment record yet
+                          div(class="flex justify-center")
+                            span(class="w-4 h-4 rounded-full bg-gray-100 inline-block")
+                        else if pago.estado === 'pagado'
+                          form(action=`/pagos/${pago.id}/pendiente` method="POST" class="flex justify-center")
+                            button(type="submit" title="Click para marcar pendiente" class="w-5 h-5 rounded-full bg-emerald-500 hover:bg-emerald-600 transition-colors cursor-pointer border-0")
+                        else if pago.estado === 'faltante'
+                          form(action=`/pagos/${pago.id}/pagado` method="POST" class="flex justify-center")
+                            button(type="submit" title="Click para marcar pagado" class="w-5 h-5 rounded-full bg-red-400 hover:bg-red-500 transition-colors cursor-pointer border-0")
+                        else
+                          //- pendiente — show options
+                          div(class="flex justify-center gap-1")
+                            form(action=`/pagos/${pago.id}/pagado` method="POST")
+                              button(type="submit" title="Marcar pagado" class="w-5 h-5 rounded-full bg-amber-400 hover:bg-emerald-500 transition-colors cursor-pointer border-0")
+                            form(action=`/pagos/${pago.id}/faltante` method="POST")
+                              button(type="submit" title="Marcar faltante" class="w-3 h-3 rounded-full bg-gray-200 hover:bg-red-400 transition-colors cursor-pointer border-0 mt-1")
+
+      //- ── PAYMENT CALENDAR ─────────────────────────────
+      div(class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden")
+        div(class="px-6 py-4 border-b border-gray-100")
+          h2(class="text-base font-semibold text-gray-800") Calendario de Pagos
+          p(class="text-xs text-gray-400 mt-0.5") Orden de recepción de la tanda
+
+        if rondas.length === 0
+          div(class="flex flex-col items-center justify-center py-16 text-center px-4")
+            p(class="text-gray-400 text-sm") Sin calendario generado
+        else
+          ul(class="divide-y divide-gray-50")
+            each ronda in rondas
+              - const isProxima = ronda.estado === 'pendiente' && rondas.filter(r => r.estado === 'pendiente')[0]?.id === ronda.id && tanda.estado === 'activa'
+              - const calBadge = ronda.estado === 'completada' ? 'bg-emerald-100 text-emerald-700' : isProxima ? 'bg-slate-900 text-white' : 'bg-gray-100 text-gray-400'
+              - const calBadgeText = ronda.estado === 'completada' ? 'Entregado' : isProxima ? 'Próximo' : 'Pendiente'
+
+              li(class="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition-colors")
+                //- Turn number circle
+                div(class=`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${ronda.estado === 'completada' ? 'bg-emerald-500 text-white' : isProxima ? 'bg-slate-900 text-white' : 'bg-gray-100 text-gray-400'}`)
+                  = ronda.numero_ronda
+
+                //- Member info
+                div(class="flex-1 min-w-0")
+                  p(class="text-sm font-semibold text-gray-800 truncate")= ronda.miembro_nombre
+                  p(class="text-xs text-gray-400")
+                    = new Date(ronda.fecha_pago).toLocaleDateString('es-MX', {day:'numeric', month:'short', year:'numeric'})
+
+                //- Status badge
+                div(class="flex items-center gap-2")
+                  span(class=`text-xs font-semibold px-2 py-0.5 rounded-full ${calBadge}`)= calBadgeText
+                  if ronda.estado === 'pendiente'
+                    form(action=`/tandas/${tanda.id}/rondas/${ronda.id}/entregada` method="POST" onsubmit="return confirm('¿Seguro que quieres marcar esta ronda como entregada?');")
+                      button(type="submit" class="text-[10px] bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white border border-emerald-200 transition-colors px-2 py-1 rounded-md font-medium" title="Marcar como entregada") Marcar Entregada
+
+    //- ── ADD MEMBER MODAL ────────────────────────────────
+    div(id="addMemberModal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4")
+      div(onclick="closeAddMemberModal()" class="absolute inset-0 bg-black/40 backdrop-blur-sm")
+      div(class="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-8 z-10")
+
+        //- Header
+        div(class="flex items-center justify-between mb-6")
+          div
+            h2(class="text-lg font-bold text-gray-900") Agregar Miembro
+            p(class="text-sm text-gray-400 mt-0.5")
+              | #{tanda.total_miembros - miembros.length} lugar(es) disponible(s)
+          button(type="button" onclick="closeAddMemberModal()" class="text-gray-400 hover:text-gray-600 transition-colors")
+            svg(xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12")
+
+        form(action=`/tandas/${tanda.id}/miembros` method="POST" class="flex flex-col gap-4")
+
+          div(class="flex flex-col gap-1")
+            label(for="add-nombre" class="text-sm font-semibold text-gray-700") Nombre
+            input(
+              type="text"
+              id="add-nombre"
+              name="nombre"
+              placeholder="Nombre del miembro"
+              required
+              class="border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+            )
+
+          div(class="flex flex-col gap-1")
+            label(for="add-telefono" class="text-sm font-semibold text-gray-700")
+              | Teléfono
+              span(class="text-gray-400 font-normal ml-1") (opcional)
+            input(
+              type="tel"
+              id="add-telefono"
+              name="telefono"
+              placeholder="449-000-0000"
+              class="border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+            )
+
+          div(class="flex flex-col gap-1")
+            label(for="add-notas" class="text-sm font-semibold text-gray-700")
+              | Notas
+              span(class="text-gray-400 font-normal ml-1") (opcional)
+            input(
+              type="text"
+              id="add-notas"
+              name="notas"
+              placeholder="Ej: Hermana, compañera de trabajo..."
+              class="border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+            )
+
+          //- Warning if rondas already exist
+          if rondas.length > 0
+            div(class="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3")
+              p(class="text-xs text-amber-700")
+                | ⚠️ Ya existen rondas generadas. Al agregar este miembro deberás reasignar los turnos manualmente.
+
+          div(class="flex items-center justify-end gap-3 pt-1")
+            button(type="button" onclick="closeAddMemberModal()" class="text-sm text-gray-400 hover:text-gray-600 px-4 py-2") Cancelar
+            button(type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-6 py-2 rounded-xl transition-colors") Agregar
+
+    //- ── EDIT MODAL ──────────────────────────────────────
+    div(id="editModal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4")
+      div(onclick="closeEditModal()" class="absolute inset-0 bg-black/40 backdrop-blur-sm")
+      div(class="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-8 z-10")
+        div(class="flex items-center justify-between mb-6")
+          div
+            h2(class="text-lg font-bold text-gray-900") Editar Tanda
+            p(class="text-sm text-gray-400 mt-1") Solo puedes editar el nombre y la descripción
+          button(type="button" onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 transition-colors")
+            svg(xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12")
+
+        form(id="editForm" method="POST" class="flex flex-col gap-4")
+          div(class="flex flex-col gap-1")
+            label(for="edit-nombre" class="text-sm font-semibold text-gray-700") Nombre de la tanda
+            input(type="text" id="edit-nombre" name="nombre" required class="border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition")
+          div(class="flex flex-col gap-1")
+            label(for="edit-descripcion" class="text-sm font-semibold text-gray-700")
+              | Descripción
+              span(class="text-gray-400 font-normal ml-1") (opcional)
+            input(type="text" id="edit-descripcion" name="descripcion" class="border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition")
+          div(class="flex items-center justify-end gap-3 pt-2")
+            button(type="button" onclick="closeEditModal()" class="text-sm text-gray-400 hover:text-gray-600 px-4 py-2") Cancelar
+            button(type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-6 py-2 rounded-xl transition-colors") Guardar
+
+block scripts
+  script.
+    // ── ADD MEMBER MODAL ──────────────────────────────────
+    function openAddMemberModal() {
+      document.getElementById('addMemberModal').classList.remove('hidden')
+      document.body.style.overflow = 'hidden'
+      document.getElementById('add-nombre').focus()
+    }
+
+    function closeAddMemberModal() {
+      document.getElementById('addMemberModal').classList.add('hidden')
+      document.body.style.overflow = ''
+    }
+
+    // ── EDIT MODAL ────────────────────────────────────────
+    function openEditModal(btn) {
+      const id = btn.dataset.id;
+      const nombre = btn.dataset.nombre;
+      const descripcion = btn.dataset.descripcion;
+      document.getElementById('editForm').action = `/tandas/${id}/editar`
+      document.getElementById('edit-nombre').value = nombre
+      document.getElementById('edit-descripcion').value = descripcion
+      document.getElementById('editModal').classList.remove('hidden')
+      document.body.style.overflow = 'hidden'
+      setTimeout(() => document.getElementById('edit-nombre').focus(), 100)
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').classList.add('hidden')
+      document.body.style.overflow = ''
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        closeEditModal()
+        closeAddMemberModal()
+      }
+    })

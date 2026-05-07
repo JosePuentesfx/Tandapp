@@ -1,0 +1,163 @@
+header.fixed.top-4.right-4.h-16.bg-emerald-50.border.border-emerald-200.flex.items-center.justify-between.px-6.z-20.rounded-xl.shadow(class="left-4 md:left-72")
+  .flex.items-center.space-x-4
+    button#menuBtn.text-emerald-800(class="focus:outline-none md:hidden")
+      svg(xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16")
+    span.text-lg.font-semibold.text-emerald-800= titulo
+
+  nav.hidden.items-center.space-x-6(class="md:flex")
+    a#notificacionesBtn.text-emerald-800.font-medium.cursor-pointer.relative(class="hover:text-emerald-600")
+      | Notificaciones
+      if unreadCount && unreadCount > 0
+        span.absolute.-top-2.-right-4.bg-red-500.text-white.text-xs.font-bold.rounded-full.w-5.h-5.flex.items-center.justify-center= unreadCount
+
+aside#sidebar.fixed.top-0.left-0.h-screen.w-64.bg-emerald-50.text-emerald-500.flex.flex-col.transform.transition-transform.duration-300.z-30(class="-translate-x-full md:translate-x-0")
+  .p-6.flex.items-center.justify-center.border-b.border-emerald-800
+    .h-10.w-10.rounded.flex.items-center.justify-center.font-bold.tracking-wide
+      img(src="/img/tandapp.png", alt="TandAppLogo")
+      p.text-2xl.font-bold TANDAPP
+  nav.mt-6.flex-1.px-4.space-y-2
+    a.block.px-3.py-2.rounded.text-sm.font-medium.text-emerald-800.flex.gap-2(href='/dashboard' class='hover:bg-emerald-200 hover:text-emerald-800')
+      img.size-6(src="/img/dashboard.png", alt="TandAppLogo")
+      | Dashboard
+    a.block.px-3.py-2.rounded.text-sm.font-medium.text-emerald-800.flex.gap-2(href='/tandas' class='hover:bg-emerald-200 hover:text-emerald-800')
+      img.size-6(src="/img/tandapp.png", alt="TandAppLogo")
+      | Tandas
+    a.block.px-3.py-2.rounded.text-sm.font-medium.text-emerald-800.flex.gap-2(href='/miembros' class='hover:bg-emerald-200 hover:text-emerald-800')
+      img.size-6(src="/img/miembros.png", alt="TandAppLogo")
+      | Miembros
+    a.block.px-3.py-2.rounded.text-sm.font-medium.text-emerald-800.flex.gap-2(href='/pagos' class='hover:bg-emerald-200 hover:text-emerald-800')
+      img.size-6(src="/img/pagos.png", alt="TandAppLogo")
+      | Pagos
+    a.block.px-3.py-2.rounded.text-sm.font-medium.text-emerald-800.flex.gap-2(href='/reportes' class='hover:bg-emerald-200 hover:text-emerald-800')
+      img.size-6(src="/img/reportes.png", alt="TandAppLogo")
+      | Reportes
+  .p-4.border-t.border-gray-800
+    a.block.px-3.py-2.rounded.text-sm.font-medium.text-emerald-800.flex.gap-2(href='/cuenta' class='hover:bg-emerald-200 hover:text-emerald-800')
+      img.size-6(src="/img/micuenta.png", alt="TandAppLogo")
+      | Mi cuenta
+    form(action='/logout' method='POST' style='margin:0')
+      input(type='hidden' name='_csrf' value=csrfToken)
+      button.block.px-3.py-2.rounded.text-sm.font-medium.text-emerald-800.flex.gap-2.w-full.text-left.cursor-pointer(type='submit' class='hover:bg-emerald-200 hover:text-emerald-800')
+        img.size-6(src="/img/logout.png", alt="Cerrar sesión")
+        | Cerrar sesión
+
+//- Dropdown de Notificaciones
+#notificacionesModal.fixed.top-20.right-6.hidden.z-50
+  .bg-white.rounded-2xl.shadow-2xl.w-96.p-6.border.border-gray-100.relative
+    //- Header del modal
+    .flex.items-center.justify-between.mb-4
+      h2.text-xl.font-bold.text-emerald-800 Notificaciones
+      .flex.items-center.gap-2
+        if unreadCount && unreadCount > 0
+          button#marcarLeidasBtn.text-xs.text-emerald-600.font-medium.px-3.py-1.rounded-full.bg-emerald-50.border.border-emerald-200.transition-colors(class="hover:bg-emerald-100") Marcar todas como leídas
+        button#cerrarNotificaciones.text-gray-400.transition-colors(class="hover:text-gray-600 focus:outline-none")
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12")
+
+    //- Lista de notificaciones
+    .space-y-3.max-h-96.overflow-y-auto.pr-2
+      if notificaciones && notificaciones.length > 0
+        each notif in notificaciones
+          - var bgColor = notif.tipo === 'pago' ? 'emerald' : notif.tipo === 'tanda' ? 'blue' : notif.tipo === 'recordatorio' ? 'amber' : notif.tipo === 'alerta' ? 'red' : 'gray'
+          .p-4.rounded-xl.border.transition-colors.cursor-pointer(class=`bg-${bgColor}-50 border-${bgColor}-100 hover:bg-${bgColor}-100 ${!notif.leida ? 'ring-2 ring-' + bgColor + '-300' : ''}`)
+            .flex.items-start.gap-3
+              .p-2.rounded-full(class=`bg-${bgColor}-200`)
+                if notif.tipo === 'pago'
+                  svg.w-5.h-5(class=`text-${bgColor}-700` xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z")
+                else if notif.tipo === 'tanda'
+                  svg.w-5.h-5(class=`text-${bgColor}-700` xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4")
+                else if notif.tipo === 'recordatorio'
+                  svg.w-5.h-5(class=`text-${bgColor}-700` xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z")
+                else
+                  svg.w-5.h-5(class=`text-${bgColor}-700` xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z")
+              div.flex-1
+                .flex.items-center.justify-between
+                  p.text-sm.font-medium(class=`text-${bgColor}-900`)= notif.titulo
+                  if !notif.leida
+                    span.w-2.h-2.rounded-full.bg-red-500.flex-shrink-0
+                p.text-xs.mt-1(class=`text-${bgColor}-700`)= notif.mensaje
+                p.text-xs.text-gray-500.mt-2.notif-time(data-time=notif.created_at)
+      else
+        .text-center.py-8
+          svg.w-12.h-12.text-gray-300.mx-auto.mb-3(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9")
+          p.text-sm.text-gray-500 No tienes notificaciones
+
+script.
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('notificacionesBtn');
+    const modal = document.getElementById('notificacionesModal');
+    const cerrar = document.getElementById('cerrarNotificaciones');
+    const marcarBtn = document.getElementById('marcarLeidasBtn');
+
+    const menuBtn = document.getElementById('menuBtn');
+    const sidebar = document.getElementById('sidebar');
+
+    if (menuBtn && sidebar) {
+      menuBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('-translate-x-full');
+      });
+    }
+
+    // Formato de tiempo relativo
+    document.querySelectorAll('.notif-time').forEach(el => {
+      const date = new Date(el.dataset.time);
+      const now = new Date();
+      const diff = Math.floor((now - date) / 1000);
+      let text = '';
+      if (diff < 60) text = 'Hace unos segundos';
+      else if (diff < 3600) text = `Hace ${Math.floor(diff / 60)} minuto${Math.floor(diff / 60) > 1 ? 's' : ''}`;
+      else if (diff < 86400) text = `Hace ${Math.floor(diff / 3600)} hora${Math.floor(diff / 3600) > 1 ? 's' : ''}`;
+      else if (diff < 604800) text = `Hace ${Math.floor(diff / 86400)} día${Math.floor(diff / 86400) > 1 ? 's' : ''}`;
+      else text = date.toLocaleDateString('es-MX');
+      el.textContent = text;
+    });
+
+    if (btn && modal && cerrar) {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        modal.classList.toggle('hidden');
+      });
+
+      cerrar.addEventListener('click', () => modal.classList.add('hidden'));
+
+      document.addEventListener('click', (e) => {
+        if (!modal.contains(e.target) && !btn.contains(e.target)) {
+          modal.classList.add('hidden');
+        }
+      });
+    }
+
+    if (marcarBtn) {
+      marcarBtn.addEventListener('click', async () => {
+        try {
+          const res = await fetch('/notificaciones/marcar-leidas', {
+            method: 'POST',
+            headers: {
+              'x-csrf-token': '#{csrfToken}'
+            }
+          });
+          if (res.ok) {
+            // Quitar indicadores de no leído
+            document.querySelectorAll('.ring-2').forEach(el => {
+              el.classList.remove('ring-2');
+              el.className = el.className.replace(/ring-\w+-300/g, '');
+            });
+            document.querySelectorAll('.w-2.h-2.rounded-full.bg-red-500').forEach(el => el.remove());
+            // Quitar badge del botón
+            const badge = btn.querySelector('span');
+            if (badge) badge.remove();
+            // Ocultar el botón de marcar
+            marcarBtn.style.display = 'none';
+          }
+        } catch (err) {
+          console.error('Error marking notifications as read:', err);
+        }
+      });
+    }
+  });

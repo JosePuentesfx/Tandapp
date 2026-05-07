@@ -1,0 +1,62 @@
+include ../layout/header.pug
+block content
+  div(class="min-h-screen bg-gray-100 flex items-center justify-center px-4 py-10")
+
+    div(class="bg-white rounded-2xl shadow-sm border border-gray-200 w-full max-w-md px-10 py-10")
+
+      //- ── LOGO + TITLE ───────────────────────────────
+      div(class="flex flex-col items-center mb-8")
+        div(class="w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center mb-4")
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z")
+        h1(class="text-2xl font-bold text-slate-900 tracking-tight") Verifica tu correo
+        p(class="text-slate-500 text-sm mt-1 text-center")
+          | Revisa 
+          strong.text-slate-800= pendingUser.email
+          |  e ingresa el código enviado
+
+      //- ── FLASH MESSAGES ───────────────────────────────
+      if success && success.length
+        div(class="bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-lg px-4 py-3 mb-5")
+          = success[0]
+      if error && error.length
+        div(class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-5")
+          = error[0]
+
+      //- ── FORM ───────────────────────────────────────
+      form(action="/register/verificar" method="POST" class="flex flex-col gap-5")
+        input(type="hidden" name="_csrf" value=csrfToken)
+
+        div(class="mb-2")
+          input#codigoInput(
+            type="text"
+            name="codigo"
+            maxlength="6"
+            placeholder="000000"
+            required
+            autocomplete="one-time-code"
+            oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+            class="w-full text-center text-3xl font-bold tracking-widest py-4 rounded-xl border-2 border-gray-200 bg-gray-50 text-gray-900 focus:outline-none focus:border-emerald-400 focus:bg-white transition-colors"
+            style="letter-spacing:0.3em"
+          )
+          p.text-xs.text-gray-400.text-center.mt-2 Solo números, 6 dígitos
+
+        button(
+          type="submit"
+          class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 rounded-lg text-sm transition"
+        ) Verificar y Continuar
+
+      //- ── BOTTOM LINK ────────────────────────────────
+      p(class="text-center text-sm text-slate-500 mt-6")
+        | ¿Te equivocaste de correo? 
+        a(href="/register" class="font-semibold text-slate-800 hover:text-emerald-600 transition") Regístrate de nuevo
+
+block scripts
+  script.
+    const input = document.getElementById('codigoInput')
+    input.focus()
+    input.addEventListener('input', () => {
+      if (input.value.length === 6) {
+        input.closest('form').submit()
+      }
+    })

@@ -1,0 +1,25 @@
+doctype html
+html(lang="es")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        meta(name="referrer" content="strict-origin-when-cross-origin")
+        title= titulo
+        script(src='https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4')
+        link(href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet")
+        script.
+          document.addEventListener('DOMContentLoaded', function() {
+            var token = '#{csrfToken}';
+            if (token) {
+              document.querySelectorAll('form').forEach(function(form) {
+                var method = (form.method || 'GET').toUpperCase();
+                if (method === 'POST' && !form.querySelector('input[name="_csrf"]')) {
+                  var input = document.createElement('input');
+                  input.type = 'hidden';
+                  input.name = '_csrf';
+                  input.value = token;
+                  form.prepend(input);
+                }
+              });
+            }
+          });

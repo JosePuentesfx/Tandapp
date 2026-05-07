@@ -1,0 +1,162 @@
+include ../layout/header.pug
+include ../layout/navbar.pug
+include ../layout/sidebar.pug 
+
+block content
+  main(class="ml-0 pt-24 px-6 pb-8 min-h-screen bg-gray-50 md:ml-64")
+
+    //- ── HEADER ──────────────────────────────────────────
+    div(class="mb-6")
+      div(class="flex items-center gap-2 text-sm text-gray-400 mb-2")
+        a(href="/tandas" class="hover:text-gray-600 transition-colors") Tandas
+        span /
+        span(class="text-gray-600 font-medium") Nueva Tanda
+      h1(class="text-2xl font-bold text-gray-900") Nueva Tanda
+      p(class="text-sm text-gray-400 mt-1") Paso 1 de 3 — Información general
+
+    //- ── PROGRESS STEPS ──────────────────────────────────
+    div(class="flex items-center gap-0 mb-8 max-w-lg")
+      div(class="flex items-center gap-2")
+        div(class="w-8 h-8 rounded-full bg-emerald-500 text-white text-sm font-bold flex items-center justify-center") 1
+        span(class="text-sm font-semibold text-emerald-600") Tanda
+      div(class="flex-1 h-0.5 bg-gray-200 mx-3")
+      div(class="flex items-center gap-2")
+        div(class="w-8 h-8 rounded-full bg-gray-200 text-gray-400 text-sm font-bold flex items-center justify-center") 2
+        span(class="text-sm text-gray-400") Miembros
+      div(class="flex-1 h-0.5 bg-gray-200 mx-3")
+      div(class="flex items-center gap-2")
+        div(class="w-8 h-8 rounded-full bg-gray-200 text-gray-400 text-sm font-bold flex items-center justify-center") 3
+        span(class="text-sm text-gray-400") Turnos
+
+    //- ── FLASH ───────────────────────────────────────────
+    if error && error.length
+      div(class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 mb-5")= error
+
+    //- ── FORM CARD ───────────────────────────────────────
+    div(class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-2xl")
+
+      form(action="/tandas/nueva" method="POST" class="flex flex-col gap-5")
+        input(type="hidden" name="_csrf" value=csrfToken)
+
+        //- Nombre
+        div(class="flex flex-col gap-1")
+          label(for="nombre" class="text-sm font-semibold text-gray-700") Nombre de la tanda
+          input(
+            type="text"
+            id="nombre"
+            name="nombre"
+            placeholder="Ej: Tanda Familiar"
+            required
+            class="border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+          )
+
+        //- Descripcion
+        div(class="flex flex-col gap-1")
+          label(for="descripcion" class="text-sm font-semibold text-gray-700")
+            | Descripción
+            span(class="text-gray-400 font-normal ml-1") (opcional)
+          input(
+            type="text"
+            id="descripcion"
+            name="descripcion"
+            placeholder="Ej: Tanda con compañeras del trabajo"
+            class="border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+          )
+
+        //- Monto + Total miembros
+        div(class="grid grid-cols-2 gap-4")
+          div(class="flex flex-col gap-1")
+            label(for="monto_aportacion" class="text-sm font-semibold text-gray-700") Monto por persona
+            div(class="relative")
+              span(class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium") $
+              input(
+                type="number"
+                id="monto_aportacion"
+                name="monto_aportacion"
+                placeholder="1,000"
+                min="1"
+                required
+                class="w-full border border-gray-200 rounded-xl pl-7 pr-4 py-3 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+              )
+
+          div(class="flex flex-col gap-1")
+            label(for="total_miembros" class="text-sm font-semibold text-gray-700") Número de miembros
+            input(
+              type="number"
+              id="total_miembros"
+              name="total_miembros"
+              placeholder="10"
+              min="2"
+              required
+              class="border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+            )
+
+        //- Frecuencia
+        div(class="flex flex-col gap-1")
+          label(for="frecuencia" class="text-sm font-semibold text-gray-700") Frecuencia de pago
+          select(
+            id="frecuencia"
+            name="frecuencia"
+            required
+            class="border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+          )
+            option(value="" disabled selected) Selecciona frecuencia
+            option(value="semanal") Semanal
+            option(value="quincenal") Quincenal
+            option(value="mensual") Mensual
+
+        //- Fecha inicio
+        div(class="flex flex-col gap-1")
+          label(for="fecha_inicio" class="text-sm font-semibold text-gray-700") Fecha de inicio
+          input(
+            type="date"
+            id="fecha_inicio"
+            name="fecha_inicio"
+            required
+            class="border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+          )
+
+        //- Preview card
+        div(class="bg-gray-50 rounded-xl p-4 border border-gray-100")
+          p(class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2") Vista previa
+          div(class="flex items-center justify-between")
+            span(class="text-sm text-gray-600") Total a recibir por turno:
+            span(class="text-lg font-bold text-emerald-600" id="preview-total") $0
+
+        //- Buttons
+        div(class="flex items-center justify-between pt-2")
+          a(href="/tandas" class="text-sm text-gray-400 hover:text-gray-600 transition-colors") Cancelar
+          button(
+            type="submit"
+            class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-colors"
+          )
+            | Siguiente
+            svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7")
+
+block scripts
+  script.
+    // Live preview of total payout
+    const montoInput = document.getElementById('monto_aportacion')
+    const miembrosInput = document.getElementById('total_miembros')
+    const preview = document.getElementById('preview-total')
+ 
+    function updatePreview() {
+      const monto = parseFloat(montoInput.value) || 0
+      const miembros = parseInt(miembrosInput.value) || 0
+      const total = monto * miembros
+      preview.textContent = '$' + total.toLocaleString('es-MX')
+    }
+ 
+    montoInput.addEventListener('input', updatePreview)
+    miembrosInput.addEventListener('input', updatePreview)
+ 
+    // ── DOUBLE SUBMIT PROTECTION ──────────────────────────
+    const form = document.querySelector('form')
+    const submitBtn = form.querySelector('button[type="submit"]')
+ 
+    form.addEventListener('submit', () => {
+      submitBtn.disabled = true
+      submitBtn.textContent = 'Creando...'
+      submitBtn.classList.add('opacity-75', 'cursor-not-allowed')
+    })

@@ -1,0 +1,171 @@
+include ../layout/header.pug
+include ../layout/sidebar.pug 
+block content
+  main.min-h-screen.bg-gray-50(class="ml-0 md:ml-64 pt-24 px-6 pb-8")
+
+    //- ── HEADER ─────────────────────────────────────────
+    .flex.items-center.justify-between.mb-6
+      div
+        h1.text-2xl.font-bold.text-gray-900 Reportes
+        p.text-sm.text-gray-500.mt-1 Exporta la información de tus tandas en Excel o PDF
+
+    //- Flash messages
+    if success && success.length
+      .mb-5.px-4.py-3.rounded-2xl.text-sm.font-medium.flex.items-center.gap-2(style="background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0")
+        svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+          path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7")
+        span= success[0]
+    if error && error.length
+      .mb-5.px-4.py-3.rounded-2xl.text-sm.font-medium.flex.items-center.gap-2(style="background: #fee2e2; color: #991b1b; border: 1px solid #fecaca")
+        svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+          path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12")
+        span= error[0]
+
+    //- ── SIN TANDAS ─────────────────────────────────────
+    if !tandas || tandas.length === 0
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-16.text-center
+        .h-16.w-16.rounded-2xl.bg-gray-100.flex.items-center.justify-center.mx-auto.mb-4
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z")
+        p.text-base.font-semibold.text-gray-700 Sin tandas todavía
+        p.text-sm.text-gray-400.mt-1 Crea tu primera tanda para poder generar reportes
+        a(href="/tandas/nueva" class="mt-5 inline-block px-5 py-2 rounded-xl text-sm font-semibold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors") + Nueva tanda
+
+    else
+      //- ── BANNER QUÉ INCLUYE ─────────────────────────
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-5.mb-6
+        .flex.items-start.gap-4
+          .h-10.w-10.rounded-xl.bg-emerald-50.flex.items-center.justify-center.shrink-0
+            svg(xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z")
+          div
+            p.text-sm.font-semibold.text-gray-800.mb-3 ¿Qué incluye cada reporte?
+
+            .grid.gap-4(class="sm:grid-cols-2")
+              //- Reporte completo
+              .rounded-xl.p-4(style="background: #f0fdf4; border: 1px solid #bbf7d0")
+                .flex.items-center.gap-2.mb-2
+                  svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z")
+                  p.text-xs.font-bold.text-emerald-700 Reporte Completo
+                .flex.flex-col.gap-1
+                  p.text-xs.text-gray-600
+                    span.text-emerald-500.font-bold ✓ 
+                    | Resumen general y estadísticas
+                  p.text-xs.text-gray-600
+                    span.text-emerald-500.font-bold ✓ 
+                    | Lista de miembros con turnos
+                  p.text-xs.text-gray-600
+                    span.text-emerald-500.font-bold ✓ 
+                    | Seguimiento de pagos por ronda
+                  p.text-xs.text-gray-600
+                    span.text-emerald-500.font-bold ✓ 
+                    | Calendario de fechas y receptores
+
+              //- Solo calendario
+              .rounded-xl.p-4(style="background: #eff6ff; border: 1px solid #bfdbfe")
+                .flex.items-center.gap-2.mb-2
+                  svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z")
+                  p.text-xs.font-bold.text-blue-700 Solo Calendario
+                .flex.flex-col.gap-1
+                  p.text-xs.text-gray-600
+                    span.text-blue-500.font-bold ✓ 
+                    | Número y fecha de cada ronda
+                  p.text-xs.text-gray-600
+                    span.text-blue-500.font-bold ✓ 
+                    | Día de la semana
+                  p.text-xs.text-gray-600
+                    span.text-blue-500.font-bold ✓ 
+                    | Quien recibe y su teléfono
+                  p.text-xs.text-gray-600
+                    span.text-blue-500.font-bold ✓ 
+                    | Estado de la ronda
+
+      //- ── GRID DE TANDAS ─────────────────────────────
+      .grid.gap-5(class="sm:grid-cols-2 xl:grid-cols-3")
+        each tanda in tandas
+          .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.flex.flex-col
+
+            //- Header de la card
+            .px-6.pt-5.pb-4(style="border-bottom: 1px solid #f3f4f6")
+              .flex.items-start.justify-between.gap-2.mb-4
+                div
+                  p.text-base.font-bold.text-gray-900= tanda.nombre
+                  p.text-xs.text-gray-400.mt-1
+                    | #{tanda.frecuencia.charAt(0).toUpperCase() + tanda.frecuencia.slice(1)} · 
+                    | $#{Number(tanda.monto_aportacion).toLocaleString('es-MX')} MXN / aportación
+                if tanda.estado === 'activa'
+                  span(class="px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 shrink-0") Activa
+                else if tanda.estado === 'pausada'
+                  span(class="px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700 shrink-0") Pausada
+                else
+                  span(class="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 shrink-0") Finalizada
+
+              //- Mini stats
+              .grid.grid-cols-3.gap-2
+                .rounded-xl.p-3.text-center(style="background: #f9fafb")
+                  p.text-xs.text-gray-400.mb-1 Miembros
+                  p.text-lg.font-bold.text-gray-800= tanda.miembros_actuales || 0
+                .rounded-xl.p-3.text-center(style="background: #f0fdf4")
+                  p.text-xs.text-gray-400.mb-1 Pagados
+                  p.text-lg.font-bold.text-emerald-600= tanda.summary ? tanda.summary.pagados : 0
+                .rounded-xl.p-3.text-center(style="background: #fef9c3")
+                  p.text-xs.text-gray-400.mb-1 Pendientes
+                  p.text-lg.font-bold.text-amber-600= tanda.summary ? tanda.summary.pendientes : 0
+
+            //- Info rápida
+            .px-6.py-3.flex.items-center.gap-4.text-xs.text-gray-400(style="border-bottom: 1px solid #f3f4f6")
+              .flex.items-center.gap-1
+                svg(xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                  path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z")
+                span Inicio: #{new Date(tanda.fecha_inicio).toLocaleDateString('es-MX', { day:'numeric', month:'short', year:'numeric' })}
+              .flex.items-center.gap-1
+                svg(xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                  path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z")
+                span Total/turno: $#{Number(tanda.monto_aportacion * tanda.total_miembros).toLocaleString('es-MX')}
+
+            //- ── BOTONES DE DESCARGA ───────────────────
+            .px-6.py-5.flex.flex-col.gap-3.mt-auto
+
+              //- Reporte Completo
+              .rounded-xl.p-4(style="background: #f9fafb; border: 1px solid #e5e7eb")
+                p.text-xs.font-bold.text-gray-600.mb-3.uppercase.tracking-wider Reporte Completo
+                .grid.grid-cols-2.gap-2
+                  a(
+                    href=`/reportes/${tanda.id}/excel?tipo=completo`
+                    class="flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-95"
+                    style="background: #1a7a4a"
+                  )
+                    svg(xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                      path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4")
+                    | Excel
+                  a(
+                    href=`/reportes/${tanda.id}/pdf?tipo=completo`
+                    class="flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-95"
+                    style="background: #dc2626"
+                  )
+                    svg(xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                      path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4")
+                    | PDF
+
+              //- Solo Calendario
+              .rounded-xl.p-4(style="background: #eff6ff; border: 1px solid #bfdbfe")
+                p.text-xs.font-bold.text-blue-600.mb-3.uppercase.tracking-wider Solo Calendario
+                .grid.grid-cols-2.gap-2
+                  a(
+                    href=`/reportes/${tanda.id}/excel?tipo=calendario`
+                    class="flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-95"
+                    style="background: #2563eb"
+                  )
+                    svg(xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                      path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4")
+                    | Excel
+                  a(
+                    href=`/reportes/${tanda.id}/pdf?tipo=calendario`
+                    class="flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-95"
+                    style="background: #7c3aed"
+                  )
+                    svg(xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                      path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4")
+                    | PDF

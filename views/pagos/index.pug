@@ -1,0 +1,257 @@
+include ../layout/header.pug
+include ../layout/navbar.pug
+include ../layout/sidebar.pug 
+
+
+block content
+  main.min-h-screen.bg-gray-50(class="ml-0 md:ml-64 pt-24 px-6 pb-8")
+
+    //- ── HEADER ─────────────────────────────────────────
+    .flex.items-center.justify-between.mb-6
+      div
+        h1.text-2xl.font-bold.text-gray-900 Pagos
+        p.text-sm.text-gray-500.mt-1 Registra y consulta los pagos de tus tandas
+
+      if tandas && tandas.length > 1
+        .flex.items-center.gap-2
+          label.text-sm.text-gray-500 Ver tanda:
+          select#selectTanda(
+            class="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+            onchange="filtrarTanda(this.value)"
+          )
+            option(value="todas") Todas las tandas
+            each t in tandas
+              option(value=`tanda-${t.id}` selected=(tandaActiva && tandaActiva == t.id))= t.nombre
+
+    //- Flash messages
+    if success && success.length
+      .mb-5.px-4.py-3.rounded-2xl.text-sm.font-medium.flex.items-center.gap-2(style="background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0")
+        svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+          path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7")
+        span= success[0]
+    if error && error.length
+      .mb-5.px-4.py-3.rounded-2xl.text-sm.font-medium.flex.items-center.gap-2(style="background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca")
+        svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+          path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12")
+        span= error[0]
+
+    //- ── SIN TANDAS ─────────────────────────────────────
+    if !tandas || tandas.length === 0
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-16.text-center
+        .h-16.w-16.rounded-2xl.bg-gray-100.flex.items-center.justify-center.mx-auto.mb-4
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z")
+        p.text-base.font-semibold.text-gray-700 Sin tandas activas
+        p.text-sm.text-gray-400.mt-1 Crea tu primera tanda para comenzar
+        a(href="/tandas/nueva" class="mt-5 inline-block px-5 py-2 rounded-xl text-sm font-semibold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors") + Nueva tanda
+
+    else
+      //- ── BLOQUE POR TANDA ────────────────────────────
+      each tanda in tandas
+        .mb-8.bloque-tanda(id=`tanda-${tanda.id}`)
+
+          //- Card principal
+          .bg-white.rounded-2xl.shadow-sm.border.border-gray-100
+
+            //- Header de la card
+            .flex.items-center.justify-between.px-6.py-4(style="border-bottom: 1px solid #f3f4f6")
+              .flex.items-center.gap-3
+                a(href=`/tandas/${tanda.id}` class="text-base font-semibold text-gray-900 hover:text-emerald-600 transition-colors")= tanda.nombre
+                if tanda.estado === 'activa'
+                  span(class="px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700") Activa
+                else if tanda.estado === 'pausada'
+                  span(class="px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700") Pausada
+                else
+                  span(class="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600") Finalizada
+
+              .flex.items-center.gap-5
+                if tanda.summary
+                  .flex.items-center.gap-4.text-xs.text-gray-500
+                    .flex.items-center.gap-1
+                      span.h-2.w-2.rounded-full.bg-emerald-500.inline-block
+                      span #{tanda.summary.pagados} pagados
+                    .flex.items-center.gap-1
+                      span.h-2.w-2.rounded-full.bg-amber-400.inline-block
+                      span #{tanda.summary.pendientes} pendientes
+                    .flex.items-center.gap-1
+                      span.h-2.w-2.rounded-full.bg-red-400.inline-block
+                      span #{tanda.summary.faltantes} faltantes
+                a(href=`/tandas/${tanda.id}` class="text-xs font-medium text-emerald-600 flex items-center gap-1 hover:underline")
+                  | Ver detalle
+                  svg(xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7")
+
+            //- Sin rondas
+            if !tanda.rondas || tanda.rondas.length === 0
+              .px-6.py-10.text-center
+                p.text-sm.text-gray-400 Esta tanda aún no tiene rondas generadas.
+                a(href=`/tandas/${tanda.id}/turnos` class="inline-block mt-3 text-sm font-medium text-emerald-600 hover:underline") Asignar turnos →
+
+            else
+              //- ── TABLA DE PAGOS ─────────────────────────────
+              .overflow-x-auto
+                table.w-full.text-sm(style="border-collapse: collapse")
+                  thead
+                    tr(style="background: #f9fafb; border-bottom: 2px solid #f3f4f6")
+                      //- Columna miembro — sticky
+                      th.text-left.py-3.px-6(
+                        style="font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.06em; min-width: 200px; position: sticky; left: 0; background: #f9fafb; z-index: 2; border-right: 1px solid #f3f4f6"
+                      ) Miembro
+                      //- Columnas de rondas
+                      each ronda in tanda.rondas
+                        th.text-center.py-3(
+                          style="font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.06em; min-width: 90px; padding-left: 8px; padding-right: 8px"
+                        )
+                          div Ronda #{ronda.numero_ronda}
+                          div(style="font-weight: 500; color: #d1d5db; font-size: 10px; text-transform: none; letter-spacing: 0; margin-top: 2px")
+                            = new Date(ronda.fecha_pago).toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })
+
+                  tbody
+                    each miembro in tanda.miembros
+                      tr(class="hover:bg-gray-50 transition-colors" style="border-bottom: 1px solid #f9fafb")
+
+                        //- Celda nombre — sticky
+                        td.py-3.px-6(
+                          style="position: sticky; left: 0; background: white; z-index: 1; border-right: 1px solid #f3f4f6"
+                        )
+                          .flex.items-center.gap-3
+                            .h-8.w-8.rounded-xl.bg-emerald-50.flex.items-center.justify-center.shrink-0
+                              span.text-xs.font-bold.text-emerald-600= miembro.nombre.charAt(0).toUpperCase()
+                            div
+                              p.font-medium.text-gray-800(style="white-space: nowrap")= miembro.nombre
+                              if miembro.telefono
+                                p.text-xs.text-gray-400= miembro.telefono
+
+                        //- Celdas de pagos
+                        each ronda in tanda.rondas
+                          - const pago = tanda.pagosMap && tanda.pagosMap[miembro.id] && tanda.pagosMap[miembro.id][ronda.id]
+                          - const esReceptor = ronda.miembro_id === miembro.id
+                          td.text-center(style="padding: 10px 8px")
+
+                            if esReceptor
+                              .flex.items-center.justify-center
+                                span(style="font-size: 20px" title=`${miembro.nombre} recibe en esta ronda`) 👑
+
+                            else if pago
+                              if pago.estado === 'pagado'
+                                //- Verde — clic regresa a pendiente
+                                form(action=`/pagos/${pago.id}/pendiente` method="POST")
+                                  button(
+                                    type="submit"
+                                    title="Pagado — clic para revertir"
+                                    class="h-8 w-8 rounded-full bg-emerald-500 flex items-center justify-center mx-auto transition-transform hover:scale-110 cursor-pointer"
+                                  )
+                                    svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                      path(stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7")
+
+                              else if pago.estado === 'faltante'
+                                //- Rojo — clic marca pagado
+                                form(action=`/pagos/${pago.id}/pagado` method="POST")
+                                  button(
+                                    type="submit"
+                                    title="Faltante — clic para marcar pagado"
+                                    class="h-8 w-8 rounded-full bg-red-400 flex items-center justify-center mx-auto transition-transform hover:scale-110 cursor-pointer"
+                                  )
+                                    svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                      path(stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12")
+
+                              else
+                                //- Pendiente — ✓ pagado  ✗ faltante
+                                .flex.items-center.justify-center.gap-1
+                                  form(action=`/pagos/${pago.id}/pagado` method="POST")
+                                    button(
+                                      type="submit"
+                                      title="Marcar como pagado"
+                                      class="h-8 w-8 rounded-full border-2 border-gray-200 bg-white flex items-center justify-center mx-auto transition-all hover:border-emerald-400 hover:bg-emerald-50 cursor-pointer"
+                                    )
+                                      svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7")
+                                  form(action=`/pagos/${pago.id}/faltante` method="POST")
+                                    button(
+                                      type="submit"
+                                      title="Marcar como faltante"
+                                      class="h-5 w-5 rounded-full bg-red-50 flex items-center justify-center mx-auto cursor-pointer hover:bg-red-100 transition-colors"
+                                    )
+                                      svg(xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12")
+
+                            else
+                              //- Sin registro
+                              .flex.items-center.justify-center
+                                span.h-5.w-5.rounded-full.inline-block(style="background: #f3f4f6; border: 2px dashed #d1d5db")
+
+              //- Leyenda
+              .flex.items-center.gap-6.px-6.py-3(style="border-top: 1px solid #f9fafb; background: #fafafa; border-radius: 0 0 16px 16px")
+                span.text-xs.text-gray-400.font-medium Leyenda:
+                .flex.items-center.gap-2
+                  span.h-4.w-4.rounded-full.bg-emerald-500.inline-block
+                  span.text-xs.text-gray-500 Pagado
+                .flex.items-center.gap-2
+                  span.h-4.w-4.rounded-full.border-2.border-gray-200.inline-block(style="background: white")
+                  span.text-xs.text-gray-500 Pendiente
+                .flex.items-center.gap-2
+                  span.h-4.w-4.rounded-full.bg-red-400.inline-block
+                  span.text-xs.text-gray-500 Faltante
+                .flex.items-center.gap-2
+                  span(style="font-size: 14px") 👑
+                  span.text-xs.text-gray-500 Recibe en esta ronda
+
+          //- ── CALENDARIO ─────────────────────────────────
+          .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.overflow-hidden.mt-4.mb-2
+            .px-6.py-4(style="border-bottom: 1px solid #f3f4f6")
+              h2.text-base.font-semibold.text-gray-800 Calendario de Pagos
+              p.text-xs.text-gray-400.mt-0(style="margin-top: 2px") Orden de recepción de la tanda
+
+            if tanda.rondas.length === 0
+              .flex.flex-col.items-center.justify-center.py-16.text-center.px-4
+                p.text-sm.text-gray-400 Sin calendario generado
+            else
+              ul(style="list-style: none; margin: 0; padding: 0")
+                each ronda in tanda.rondas
+                  - const receptor = tanda.miembros.find(m => m.id === ronda.miembro_id)
+                  - const isProxima = ronda.estado === 'pendiente' && tanda.rondas.filter(r => r.estado === 'pendiente')[0]?.id === ronda.id && tanda.estado === 'activa'
+                  - const calBadge = ronda.estado === 'completada' ? 'bg-emerald-100 text-emerald-700' : isProxima ? 'bg-slate-900 text-white' : 'bg-gray-100 text-gray-400'
+                  - const calBadgeText = ronda.estado === 'completada' ? 'Entregado' : isProxima ? 'Próximo' : 'Pendiente'
+
+                  li.flex.items-center.gap-3.px-5.py-3.transition-colors(class="hover:bg-gray-50" style="border-bottom: 1px solid #f9fafb")
+                    //- Turn number circle
+                    div(class=`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${ronda.estado === 'completada' ? 'bg-emerald-500 text-white' : isProxima ? 'bg-slate-900 text-white' : 'bg-gray-100 text-gray-400'}`)
+                      = ronda.numero_ronda
+
+                    //- Member info
+                    .flex-1.min-w-0
+                      p.text-sm.font-semibold.text-gray-800.truncate= receptor ? receptor.nombre : '—'
+                      p.text-xs.text-gray-400
+                        = new Date(ronda.fecha_pago).toLocaleDateString('es-MX', {day:'numeric', month:'short', year:'numeric'})
+
+                    //- Status badge
+                    span(class=`text-xs font-semibold px-2 py-0.5 rounded-full ${calBadge}`)= calBadgeText
+
+block scripts
+  script.
+    function filtrarTanda(valor) {
+      document.querySelectorAll('.bloque-tanda').forEach(b => {
+        b.style.display = (valor === 'todas' || b.id === valor) ? '' : 'none'
+      })
+    }
+
+    // Aplicar filtro si viene ?tanda=ID en la URL
+    const params = new URLSearchParams(window.location.search)
+    const tandaParam = params.get('tanda')
+    if (tandaParam) {
+      const sel = document.getElementById('selectTanda')
+      if (sel) {
+        sel.value = 'tanda-' + tandaParam
+        filtrarTanda('tanda-' + tandaParam)
+      }
+    }
+
+    // Shadow en columna nombre al hacer scroll horizontal
+    document.querySelectorAll('.overflow-x-auto').forEach(container => {
+      container.addEventListener('scroll', () => {
+        const scrolled = container.scrollLeft > 0
+        container.querySelectorAll('td:first-child, th:first-child').forEach(el => {
+          el.style.boxShadow = scrolled ? '4px 0 10px rgba(0,0,0,0.07)' : ''
+        })
+      })
+    })

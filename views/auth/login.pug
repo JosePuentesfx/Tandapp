@@ -1,0 +1,82 @@
+include ../layout/header.pug
+
+block content
+  div(class="min-h-screen bg-emerald-100 flex items-center justify-center px-4 py-10")
+    div(class="bg-white rounded-2xl shadow-sm border border-emerald-200 w-full max-w-md px-6 py-10")
+      div(class="flex flex-col items-center mb-8")
+        a.flex.items-center.gap-3.min-w-0(href="/homepage")
+          img.h-9.w-9.shrink-0(src="/img/tandapp.png", alt="Logo TandApp")
+          span.text-xl.font-bold.text-emerald-900.tracking-wide TANDAPP
+        p(class="dark:text-gray-400/100 text-center mb-15") Ingresa a tu cuenta para administrar tus tandas
+
+        //- Error flash
+        if error && error.length
+          div(class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-5")
+            = error
+
+        form(action="/login" method="POST")
+          input(type="hidden" name="_csrf" value=csrfToken)
+          div.mb-6
+            label.block.my-2(for='username') Correo electronico
+            input#username(
+              class="rounded-sm mb-2 w-96 inset-shadow-2xs ring ring-black/20 placeholder:opacity-90 px-2"
+              type='email'
+              name="email"
+              placeholder="tu@correo.com"
+            )
+
+          div
+            label(class="block mb-4" for='password') Contraseña
+              .relative.w-96
+                input#password(
+                  class="rounded-sm mb-2 w-full inset-shadow-2xs ring ring-black/20 placeholder:opacity-90 px-2 pr-10 py-2"
+                  type='password'
+                  name="password"
+                  placeholder='******'
+                )
+                button(type="button" onclick="togglePassword('password', 'eyeIcon1')" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600")
+                  svg(id="eyeIcon1" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z")
+                    path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z")
+
+          div(class="flex items-center justify-between w-full mb-10 my-4")
+            div(class="flex items-center")
+              .inline-flex.items-center
+                label(class="flex items-center cursor-pointer")
+                  .relative
+                    input#check(type="checkbox" checked class="peer h-5 w-5 cursor-pointer transition-all appearance-none rounded shadow hover:shadow-md border border-slate-300 checked:bg-emerald-800 checked:border-slate-800")
+                    span(class="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none")
+                      svg(class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" stroke="currentColor" stroke-width="1")
+                        path(fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd")
+                span.ml-2.text-sm.text-gray-700 Recordarme
+            a(href="/forgot-password" class="text-sm text-black hover:underline justify-end font-bold") ¿Olvidaste tu contraseña?
+
+          button(
+            type="submit"
+            class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 rounded-lg text-sm transition mt-1"
+          ) Iniciar Sesión
+
+        div(class='text-center text-sm text-slate-500 mt-6')
+          p ¿No tienes cuenta?
+          a(href="/register" class="font-semibold text-emerald-800 hover:text-emerald-600 transition") Registrate aquí
+          p ó
+          a(href="/homepage" class="font-semibold text-emerald-800 hover:text-emerald-600 transition") Regresar a inicio.
+//- ── TOGGLE PASSWORD SCRIPT ─────────────────────────
+block scripts
+  script.
+    function togglePassword(inputId, iconId) {
+      const input = document.getElementById(inputId)
+      const icon = document.getElementById(iconId)
+      if (input.type === 'password') {
+        input.type = 'text'
+        icon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+        `
+      } else {
+        input.type = 'password'
+        icon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+        `
+      }
+    }

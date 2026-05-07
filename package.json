@@ -1,0 +1,41 @@
+{
+  "name": "tandasproyecto",
+  "version": "1.0.0",
+  "description": "Proyeto de tercer parcial para seguridad y desarrollo.",
+  "homepage": "https://github.com/Angelfinn12/TandasProyecto#readme",
+  "bugs": {
+    "url": "https://github.com/Angelfinn12/TandasProyecto/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Angelfinn12/TandasProyecto.git"
+  },
+  "license": "ISC",
+  "author": "Fishmen",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "connect-flash": "^0.1.1",
+    "cookie-parser": "^1.4.7",
+    "csrf-csrf": "^4.0.3",
+    "dotenv": "^17.3.1",
+    "exceljs": "^4.4.0",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.3.2",
+    "express-session": "^1.19.0",
+    "express-validator": "^7.3.1",
+    "helmet": "^8.1.0",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^8.0.5",
+    "pg": "^8.20.0",
+    "pug": "^3.0.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

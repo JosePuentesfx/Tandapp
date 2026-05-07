@@ -1,0 +1,4 @@
+
+//- CSRF hidden input — include inside every form
+mixin csrf
+  input(type="hidden" name="_csrf" value=csrfToken)

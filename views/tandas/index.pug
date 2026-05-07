@@ -1,0 +1,246 @@
+include ../layout/header.pug
+include ../layout/navbar.pug
+include ../layout/sidebar.pug 
+
+
+
+block content
+  main(class="ml-0 pt-24 px-6 pb-8 min-h-screen bg-gray-50 md:ml-64")
+
+    //- ── HEADER ROW ──────────────────────────────────────
+    div(class="flex items-center justify-between mb-6")
+      div
+        h1(class="text-2xl font-bold text-gray-900") Mis Tandas
+        p(class="text-sm text-gray-400 mt-1") Gestiona y da seguimiento a tus tandas
+
+      a(href="/tandas/nueva" class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm")
+        svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+          path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4")
+        | Nueva Tanda
+
+    //- ── SEARCH + FILTER ─────────────────────────────────
+    div(class="flex flex-col gap-3 mb-6 sm:flex-row")
+      div(class="relative flex-1")
+        span(class="absolute inset-y-0 left-3 flex items-center pointer-events-none")
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z")
+        input#searchInput(
+          type="text"
+          placeholder="Buscar tandas..."
+          class="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+        )
+
+    //- ── FLASH MESSAGES ──────────────────────────────────
+    if success && success.length
+      div(class="bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-xl px-4 py-3 mb-4")= success
+    if error && error.length
+      div(class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 mb-4")= error
+
+    //- ── TABLE CARD ──────────────────────────────────────
+    //- overflow-visible so dropdowns aren't clipped by the card
+    div(class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-visible")
+
+      if tandas && tandas.length
+
+        //- Wrap table in overflow-x-auto so horizontal scroll still works
+        div(class="overflow-x-auto")
+          table(class="w-full text-sm" id="tandasTable")
+            thead
+              tr(class="border-b border-gray-100 bg-gray-50 rounded-t-2xl")
+                th(class="text-left px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider") Nombre
+                th(class="text-left px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider") Miembros
+                th(class="text-left px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider") Monto
+                th(class="text-left px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider") Frecuencia
+                th(class="text-left px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider") Progreso
+                th(class="px-6 py-4")
+
+            tbody(class="divide-y divide-gray-50")
+              each tanda in tandas
+                - const progreso = Math.round(Number(tanda.progreso_fecha) || 0)
+                - const frecuenciaLabel = tanda.frecuencia.charAt(0).toUpperCase() + tanda.frecuencia.slice(1)
+
+                tr(class="hover:bg-gray-50 transition-colors" data-nombre=tanda.nombre.toLowerCase())
+
+                  //- Nombre
+                  td(class="px-6 py-4")
+                    p(class="font-semibold text-gray-800")= tanda.nombre
+                    if tanda.descripcion
+                      p(class="text-xs text-gray-400 mt-1 truncate" style="max-width:180px")= tanda.descripcion
+
+                  //- Miembros
+                  td(class="px-6 py-4")
+                    span(class="text-emerald-600 font-semibold")= tanda.miembros_actuales || 0
+                    span(class="text-gray-400") /#{tanda.total_miembros}
+
+                  //- Monto
+                  td(class="px-6 py-4 text-gray-700 font-medium") $#{Number(tanda.monto_aportacion).toLocaleString('es-MX')}
+
+                  //- Frecuencia
+                  td(class="px-6 py-4 text-gray-600")= frecuenciaLabel
+
+                  //- Progreso
+                  td(class="px-6 py-4")
+                    div(class="flex items-center gap-3")
+                      div(class="flex-1 bg-gray-100 rounded-full h-2" style="min-width:80px")
+                        div(class="h-2 rounded-full bg-emerald-500 transition-all" style=`width:${progreso}%`)
+                      span(class="text-xs text-gray-500 font-medium w-8") #{progreso}%
+
+                  //- Actions dropdown — fixed: uses fixed positioning via JS
+                  td(class="px-6 py-4 text-right")
+                    div(class="relative inline-block")
+                      button(
+                        type="button"
+                        onclick=`toggleMenu(event, 'menu-${tanda.id}')`
+                        class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                      )
+                        svg(xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                          path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z")
+
+                      //- Dropdown — fixed position set by JS so it's never clipped
+                      div(class="hidden fixed w-44 bg-white rounded-xl shadow-xl border border-gray-100 z-50 py-1" id=`menu-${tanda.id}`)
+
+                        a(href=`/tandas/${tanda.id}` class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors")
+                          svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z")
+                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z")
+                          | Ver detalles
+
+                        button(
+                          type="button"
+                          data-id=tanda.id
+                          data-nombre=tanda.nombre
+                          data-descripcion=(tanda.descripcion || '')
+                          onclick="openEditModal(this)"
+                          class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors w-full text-left"
+                        )
+                          svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z")
+                          | Editar
+
+                        div(class="border-t border-gray-100 my-1")
+
+                        form(action=`/tandas/${tanda.id}/delete` method="POST" onsubmit="return confirm('¿Eliminar esta tanda? Esta acción no se puede deshacer.')")
+                          button(type="submit" class="flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors w-full text-left")
+                            svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16")
+                            | Eliminar
+
+      //- Empty state
+      else
+        div(class="flex flex-col items-center justify-center py-20 text-center")
+          div(class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-4")
+            svg(xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2")
+          p(class="text-gray-500 font-medium") Aún no tienes tandas
+          p(class="text-gray-400 text-sm mt-1") Crea tu primera tanda para empezar
+          a(href="/tandas/nueva" class="mt-4 inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors")
+            svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4")
+            | Nueva Tanda
+
+  //- ── EDIT MODAL — only name + description ────────────
+  div(id="editModal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4")
+    div(onclick="closeEditModal()" class="absolute inset-0 bg-black/40 backdrop-blur-sm")
+    div(class="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-8 z-10")
+
+      div(class="flex items-center justify-between mb-6")
+        div
+          h2(class="text-lg font-bold text-gray-900") Editar Tanda
+          p(class="text-sm text-gray-400 mt-1") Solo puedes editar el nombre y la descripción
+        button(type="button" onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 transition-colors")
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12")
+
+      form(id="editForm" method="POST" class="flex flex-col gap-4")
+
+        div(class="flex flex-col gap-1")
+          label(for="edit-nombre" class="text-sm font-semibold text-gray-700") Nombre de la tanda
+          input(
+            type="text"
+            id="edit-nombre"
+            name="nombre"
+            required
+            class="border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+          )
+
+        div(class="flex flex-col gap-1")
+          label(for="edit-descripcion" class="text-sm font-semibold text-gray-700")
+            | Descripción
+            span(class="text-gray-400 font-normal ml-1") (opcional)
+          input(
+            type="text"
+            id="edit-descripcion"
+            name="descripcion"
+            class="border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+          )
+
+        div(class="flex items-center justify-end gap-3 pt-2")
+          button(type="button" onclick="closeEditModal()" class="text-sm text-gray-400 hover:text-gray-600 px-4 py-2") Cancelar
+          button(type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-6 py-2 rounded-xl transition-colors") Guardar
+
+block scripts
+  script.
+    // ── DROPDOWN — uses fixed position so it's never clipped ──
+    function toggleMenu(event, id) {
+      event.stopPropagation()
+      const btn = event.currentTarget
+      const rect = btn.getBoundingClientRect()
+      const menu = document.getElementById(id)
+
+      // Close all other menus
+      document.querySelectorAll('[id^="menu-"]').forEach(m => {
+        if (m.id !== id) m.classList.add('hidden')
+      })
+
+      // Toggle this menu
+      if (menu.classList.contains('hidden')) {
+        // Position below the button, aligned to the right
+        menu.style.top = (rect.bottom + window.scrollY + 4) + 'px'
+        menu.style.left = (rect.right + window.scrollX - 176) + 'px' // 176 = w-44
+        menu.classList.remove('hidden')
+      } else {
+        menu.classList.add('hidden')
+      }
+    }
+
+    // Close menus when clicking outside
+    document.addEventListener('click', () => {
+      document.querySelectorAll('[id^="menu-"]').forEach(m => m.classList.add('hidden'))
+    })
+
+    // Close on scroll (so menu doesn't float away)
+    window.addEventListener('scroll', () => {
+      document.querySelectorAll('[id^="menu-"]').forEach(m => m.classList.add('hidden'))
+    })
+
+    // ── SEARCH ───────────────────────────────────────────
+    document.getElementById('searchInput').addEventListener('input', function() {
+      const search = this.value.toLowerCase()
+      document.querySelectorAll('#tandasTable tbody tr').forEach(row => {
+        const nombre = row.dataset.nombre || ''
+        row.style.display = nombre.includes(search) ? '' : 'none'
+      })
+    })
+
+    // ── EDIT MODAL — only id, nombre, descripcion ─────────
+    function openEditModal(btn) {
+      const id = btn.dataset.id;
+      const nombre = btn.dataset.nombre;
+      const descripcion = btn.dataset.descripcion;
+      document.getElementById('editForm').action = `/tandas/${id}/editar`
+      document.getElementById('edit-nombre').value = nombre
+      document.getElementById('edit-descripcion').value = descripcion
+      document.getElementById('editModal').classList.remove('hidden')
+      document.body.style.overflow = 'hidden'
+      document.querySelectorAll('[id^="menu-"]').forEach(m => m.classList.add('hidden'))
+      setTimeout(() => document.getElementById('edit-nombre').focus(), 100)
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').classList.add('hidden')
+      document.body.style.overflow = ''
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeEditModal()
+    })

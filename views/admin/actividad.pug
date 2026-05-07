@@ -1,0 +1,276 @@
+include ../layout/header.pug
+include ../layout/sidebaradmin.pug 
+block content
+  main.min-h-screen.bg-gray-50(class="ml-0 md:ml-64 pt-24 px-6 pb-8")
+
+    //- ── HEADER ─────────────────────────────────────────
+    .flex.items-center.justify-between.mb-6
+      div
+        .flex.items-center.gap-2.mb-1
+          span.text-xs.font-semibold.px-2.py-1.rounded-full(style="background:#fef3c7; color:#92400e") Panel Admin
+          a(href="/admin" class="text-xs text-gray-400 hover:underline") ← Dashboard
+        h1.text-2xl.font-bold.text-gray-900 Actividad del Sistema
+        p.text-sm.text-gray-500.mt-1 Estadísticas y tendencias de uso de TandaApp
+
+    //- ── STAT CARDS ─────────────────────────────────────
+    .grid.grid-cols-1.gap-4.mb-6(class="sm:grid-cols-2 xl:grid-cols-4")
+
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-5
+        .flex.items-center.justify-between.mb-3
+          p.text-sm.text-gray-500 Registros este mes
+          .h-9.w-9.rounded-xl.bg-emerald-50.flex.items-center.justify-center
+            svg(xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z")
+        p.text-3xl.font-bold.text-gray-900= actividadStats.registrosEsteMes || 0
+        p.text-xs.text-gray-400.mt-1
+          if actividadStats.registrosMesAnterior > 0
+            | vs #{actividadStats.registrosMesAnterior} el mes pasado
+          else
+            | Sin datos del mes anterior
+
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-5
+        .flex.items-center.justify-between.mb-3
+          p.text-sm.text-gray-500 Tandas creadas este mes
+          .h-9.w-9.rounded-xl.bg-amber-50.flex.items-center.justify-center
+            svg(xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z")
+        p.text-3xl.font-bold.text-gray-900= actividadStats.tandasEsteMes || 0
+        p.text-xs.text-gray-400.mt-1 tandas nuevas
+
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-5
+        .flex.items-center.justify-between.mb-3
+          p.text-sm.text-gray-500 Pagos registrados hoy
+          .h-9.w-9.rounded-xl.bg-blue-50.flex.items-center.justify-center
+            svg(xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2")
+        p.text-3xl.font-bold.text-gray-900= actividadStats.pagosHoy || 0
+        p.text-xs.text-gray-400.mt-1 actualizaciones de estado
+
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-5
+        .flex.items-center.justify-between.mb-3
+          p.text-sm.text-gray-500 Tasa de activación
+          .h-9.w-9.rounded-xl.bg-purple-50.flex.items-center.justify-center
+            svg(xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z")
+        p.text-3xl.font-bold.text-gray-900
+          = actividadStats.totalUsuarios > 0 ? Math.round((actividadStats.usuariosActivos / actividadStats.totalUsuarios) * 100) : 0
+          span.text-xl.font-normal.text-gray-400 %
+        p.text-xs.text-gray-400.mt-1 usuarios activos
+
+    //- ── FILA 1: Registros por mes + Roles ──────────────
+    .grid.grid-cols-1.gap-6.mb-6(class="lg:grid-cols-3")
+
+      //- Gráfica: Cuentas creadas por mes (últimos 6 meses)
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-6(class="lg:col-span-2")
+        .flex.items-center.justify-between.mb-1
+          h2.text-base.font-semibold.text-gray-900 Cuentas creadas
+          span.text-xs.text-gray-400 Últimos 6 meses
+        p.text-xs.text-gray-400.mb-4 Nuevos usuarios registrados por mes
+        //- Leyenda manual
+        .flex.items-center.gap-4.mb-4
+          .flex.items-center.gap-1.text-xs.text-gray-500
+            span(style="width:10px; height:10px; border-radius:2px; background:#1a7a4a; display:inline-block")
+            | Organizadores
+          .flex.items-center.gap-1.text-xs.text-gray-500
+            span(style="width:10px; height:10px; border-radius:2px; background:#8b5cf6; display:inline-block")
+            | Admins
+        div(style="position:relative; width:100%; height:220px")
+          canvas#chartRegistros(role="img" aria-label="Gráfica de barras de cuentas creadas por mes en los últimos 6 meses")
+            | Datos de cuentas creadas por mes.
+
+      //- Gráfica: Distribución de roles (donut)
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-6
+        .flex.items-center.justify-between.mb-1
+          h2.text-base.font-semibold.text-gray-900 Roles de usuarios
+          span.text-xs.text-gray-400 Total: #{actividadStats.totalUsuarios || 0}
+        p.text-xs.text-gray-400.mb-4 Distribución por tipo de cuenta
+        div(style="position:relative; width:100%; height:180px")
+          canvas#chartRoles(role="img" aria-label="Gráfica donut de distribución de roles de usuarios")
+            | Distribución de roles de usuarios.
+        .flex.items-center.justify-center.gap-5.mt-4
+          .flex.items-center.gap-1.text-xs.text-gray-500
+            span(style="width:10px; height:10px; border-radius:2px; background:#1a7a4a; display:inline-block")
+            | Organizadores (#{actividadStats.totalOrganizadores || 0})
+          .flex.items-center.gap-1.text-xs.text-gray-500
+            span(style="width:10px; height:10px; border-radius:2px; background:#8b5cf6; display:inline-block")
+            | Admins (#{actividadStats.totalAdmins || 0})
+
+    //- ── FILA 2: Tandas por mes + Estado de pagos ────────
+    .grid.grid-cols-1.gap-6.mb-6(class="lg:grid-cols-2")
+
+      //- Gráfica: Tandas creadas por mes
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-6
+        .flex.items-center.justify-between.mb-1
+          h2.text-base.font-semibold.text-gray-900 Tandas creadas
+          span.text-xs.text-gray-400 Últimos 6 meses
+        p.text-xs.text-gray-400.mb-4 Actividad de creación de tandas
+        .flex.items-center.gap-4.mb-4
+          .flex.items-center.gap-1.text-xs.text-gray-500
+            span(style="width:10px; height:10px; border-radius:2px; background:#f59e0b; display:inline-block")
+            | Tandas nuevas
+        div(style="position:relative; width:100%; height:200px")
+          canvas#chartTandas(role="img" aria-label="Gráfica de línea de tandas creadas por mes")
+            | Datos de tandas creadas por mes.
+
+      //- Gráfica: Estado global de pagos
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-6
+        .flex.items-center.justify-between.mb-1
+          h2.text-base.font-semibold.text-gray-900 Estado global de pagos
+          span.text-xs.text-gray-400 Todo el sistema
+        p.text-xs.text-gray-400.mb-4 Distribución de pagos por estado
+        .flex.items-center.gap-4.mb-4
+          .flex.items-center.gap-1.text-xs.text-gray-500
+            span(style="width:10px; height:10px; border-radius:2px; background:#10b981; display:inline-block")
+            | Pagados (#{actividadStats.pagosPagados || 0})
+          .flex.items-center.gap-1.text-xs.text-gray-500
+            span(style="width:10px; height:10px; border-radius:2px; background:#f59e0b; display:inline-block")
+            | Pendientes (#{actividadStats.pagosPendientes || 0})
+          .flex.items-center.gap-1.text-xs.text-gray-500
+            span(style="width:10px; height:10px; border-radius:2px; background:#ef4444; display:inline-block")
+            | Faltantes (#{actividadStats.pagosFaltantes || 0})
+        div(style="position:relative; width:100%; height:200px")
+          canvas#chartPagos(role="img" aria-label="Gráfica donut del estado global de pagos en el sistema")
+            | Estado global de pagos en el sistema.
+
+    //- ── FILA 3: Estado de tandas + Actividad reciente ──
+    .grid.grid-cols-1.gap-6(class="lg:grid-cols-3")
+
+      //- Gráfica: Estado de tandas
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-6
+        .flex.items-center.justify-between.mb-1
+          h2.text-base.font-semibold.text-gray-900 Estado de tandas
+          span.text-xs.text-gray-400 #{actividadStats.totalTandas || 0} en total
+        p.text-xs.text-gray-400.mb-4 Activas, pausadas y finalizadas
+        .flex.items-center.gap-3.mb-4.flex-wrap
+          .flex.items-center.gap-1.text-xs.text-gray-500
+            span(style="width:10px; height:10px; border-radius:2px; background:#1a7a4a; display:inline-block")
+            | Activas (#{actividadStats.tandasActivas || 0})
+          .flex.items-center.gap-1.text-xs.text-gray-500
+            span(style="width:10px; height:10px; border-radius:2px; background:#f59e0b; display:inline-block")
+            | Pausadas (#{actividadStats.tandasPausadas || 0})
+          .flex.items-center.gap-1.text-xs.text-gray-500
+            span(style="width:10px; height:10px; border-radius:2px; background:#9ca3af; display:inline-block")
+            | Finalizadas (#{actividadStats.tandasFinalizadas || 0})
+        div(style="position:relative; width:100%; height:200px")
+          canvas#chartEstadoTandas(role="img" aria-label="Gráfica de barras del estado de tandas")
+            | Estado de tandas en el sistema.
+
+      //- Últimos registros
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-6(class="lg:col-span-2")
+        .flex.items-center.justify-between.mb-4
+          h2.text-base.font-semibold.text-gray-900 Últimos registros
+          a(href="/admin/usuarios" class="text-xs text-emerald-600 hover:underline") Ver todos →
+        if ultimosUsuarios && ultimosUsuarios.length
+          .flex.flex-col.gap-2
+            each u in ultimosUsuarios
+              .flex.items-center.gap-3.p-3.rounded-xl(style="border:1px solid #f3f4f6" class="hover:bg-gray-50 transition-colors")
+                .h-8.w-8.rounded-lg.flex.items-center.justify-center.text-xs.font-bold.shrink-0(
+                  style=`background:${u.activo ? '#dcfce7' : '#f3f4f6'}; color:${u.activo ? '#16a34a' : '#9ca3af'}`
+                )= (u.nombre.charAt(0) + u.apellido.charAt(0)).toUpperCase()
+                div.flex-1.min-w-0
+                  p.text-sm.font-semibold.text-gray-800= `${u.nombre} ${u.apellido}`
+                  p.text-xs.text-gray-400.truncate= u.email
+                div.shrink-0.text-right
+                  span(class=`text-xs font-medium px-2 py-1 rounded-full ${u.rol === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'}`)= u.rol
+                  p.text-xs.text-gray-400.mt-1= new Date(u.created_at).toLocaleDateString('es-MX', {day:'numeric', month:'short', year:'numeric'})
+        else
+          p.text-sm.text-gray-400.text-center.py-8 Sin usuarios registrados
+
+block scripts
+  script(src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js")
+  script.
+    const mesesLabels    = !{JSON.stringify(graficas.mesesLabels)}
+    const registrosMes   = !{JSON.stringify(graficas.registrosPorMes)}
+    const adminsPorMes   = !{JSON.stringify(graficas.adminsPorMes)}
+    const tandasPorMes   = !{JSON.stringify(graficas.tandasPorMes)}
+    const totalOrg       = #{actividadStats.totalOrganizadores || 0}
+    const totalAdmins    = #{actividadStats.totalAdmins || 0}
+    const pagosPagados   = #{actividadStats.pagosPagados || 0}
+    const pagosPendientes= #{actividadStats.pagosPendientes || 0}
+    const pagosFaltantes = #{actividadStats.pagosFaltantes || 0}
+    const tandasActivas  = #{actividadStats.tandasActivas || 0}
+    const tandasPausadas = #{actividadStats.tandasPausadas || 0}
+    const tandasFin      = #{actividadStats.tandasFinalizadas || 0}
+
+    const gridColor   = 'rgba(0,0,0,0.05)'
+    const ticksColor  = '#9ca3af'
+    const baseOpts = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: gridColor }, ticks: { color: ticksColor, font: { size: 11 } } },
+        y: { grid: { color: gridColor }, ticks: { color: ticksColor, font: { size: 11 }, stepSize: 1 } }
+      }
+    }
+
+    // ── Cuentas creadas (barras apiladas) ──────────────
+    new Chart(document.getElementById('chartRegistros'), {
+      type: 'bar',
+      data: {
+        labels: mesesLabels,
+        datasets: [
+          { label: 'Organizadores', data: registrosMes, backgroundColor: '#1a7a4a', borderRadius: 4, borderSkipped: false },
+          { label: 'Admins',        data: adminsPorMes, backgroundColor: '#8b5cf6', borderRadius: 4, borderSkipped: false }
+        ]
+      },
+      options: { ...baseOpts, scales: { ...baseOpts.scales, x: { ...baseOpts.scales.x, stacked: true }, y: { ...baseOpts.scales.y, stacked: true } } }
+    })
+
+    // ── Roles donut ─────────────────────────────────────
+    new Chart(document.getElementById('chartRoles'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Organizadores', 'Admins'],
+        datasets: [{ data: [totalOrg, totalAdmins], backgroundColor: ['#1a7a4a', '#8b5cf6'], borderWidth: 0, hoverOffset: 4 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { display: false } } }
+    })
+
+    // ── Tandas por mes (línea) ──────────────────────────
+    new Chart(document.getElementById('chartTandas'), {
+      type: 'line',
+      data: {
+        labels: mesesLabels,
+        datasets: [{
+          label: 'Tandas', data: tandasPorMes,
+          borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.08)',
+          borderWidth: 2, pointBackgroundColor: '#f59e0b',
+          pointRadius: 4, pointHoverRadius: 6, fill: true, tension: 0.35
+        }]
+      },
+      options: baseOpts
+    })
+
+    // ── Estado de pagos (donut) ─────────────────────────
+    new Chart(document.getElementById('chartPagos'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Pagados', 'Pendientes', 'Faltantes'],
+        datasets: [{ data: [pagosPagados, pagosPendientes, pagosFaltantes], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], borderWidth: 0, hoverOffset: 4 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false } } }
+    })
+
+    // ── Estado de tandas (barras horizontales) ──────────
+    new Chart(document.getElementById('chartEstadoTandas'), {
+      type: 'bar',
+      data: {
+        labels: ['Activas', 'Pausadas', 'Finalizadas'],
+        datasets: [{
+          data: [tandasActivas, tandasPausadas, tandasFin],
+          backgroundColor: ['#1a7a4a', '#f59e0b', '#9ca3af'],
+          borderRadius: 6, borderSkipped: false
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: gridColor }, ticks: { color: ticksColor, font: { size: 11 }, stepSize: 1 } },
+          y: { grid: { display: false }, ticks: { color: '#374151', font: { size: 12 } } }
+        }
+      }
+    })

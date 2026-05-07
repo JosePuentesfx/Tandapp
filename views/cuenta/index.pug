@@ -1,0 +1,99 @@
+include ../layout/header.pug
+if user && user.rol === 'admin'
+  include ../layout/sidebaradmin.pug
+else
+  include ../layout/sidebar.pug 
+
+block content
+  main.min-h-screen.bg-gray-50(class="ml-0 md:ml-64 pt-24 px-6 pb-8")
+
+    .mb-6
+      h1.text-2xl.font-bold.text-gray-900 Mi Cuenta
+      p.text-sm.text-gray-500.mt-1 Administra tu información personal y seguridad
+
+    if success && success.length
+      .mb-5.px-4.py-3.rounded-2xl.text-sm.font-medium.flex.items-center.gap-2(style="background:#d1fae5;color:#065f46;border:1px solid #a7f3d0")
+        svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+          path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7")
+        span= success[0]
+    if error && error.length
+      .mb-5.px-4.py-3.rounded-2xl.text-sm.font-medium.flex.items-center.gap-2(style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca")
+        svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+          path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12")
+        span= error[0]
+
+    .grid.grid-cols-1.gap-6(class="lg:grid-cols-3")
+
+      //- Tarjeta de perfil
+      .flex.flex-col.gap-6
+        .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-6
+          .flex.flex-col.items-center.text-center.pb-5(style="border-bottom:1px solid #f3f4f6")
+            .h-20.w-20.rounded-2xl.flex.items-center.justify-center.text-2xl.font-bold.mb-3(style="background:#dcfce7;color:#16a34a")
+              = (user.nombre.charAt(0) + user.apellido.charAt(0)).toUpperCase()
+            h2.text-lg.font-bold.text-gray-900= `${user.nombre} ${user.apellido}`
+            p.text-sm.text-gray-400.mt-1= user.email
+            .mt-3
+              if user.rol === 'admin'
+                span.text-xs.font-semibold.px-3.py-1.rounded-full(style="background:#f3e8ff;color:#7c3aed") Administrador
+              else
+                span.text-xs.font-semibold.px-3.py-1.rounded-full(style="background:#dcfce7;color:#166534") Organizador
+
+          .pt-4.flex.flex-col.gap-3
+            .flex.items-center.justify-between
+              span.text-xs.text-gray-400 Miembro desde
+              span.text-xs.font-medium.text-gray-700
+                = new Date(cuentaData.created_at).toLocaleDateString('es-MX', {day:'numeric',month:'long',year:'numeric'})
+            .flex.items-center.justify-between
+              span.text-xs.text-gray-400 Tandas creadas
+              span.text-xs.font-medium.text-gray-700= cuentaData.totalTandas || 0
+            .flex.items-center.justify-between
+              span.text-xs.text-gray-400 Miembros registrados
+              span.text-xs.font-medium.text-gray-700= cuentaData.totalMiembros || 0
+
+      //- Formularios
+      .flex.flex-col.gap-6(class="lg:col-span-2")
+
+        //- Editar info personal
+        .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-6
+          .flex.items-center.gap-3.mb-5
+            .h-9.w-9.rounded-xl.bg-emerald-50.flex.items-center.justify-center.shrink-0
+              svg(xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z")
+            div
+              h3.text-base.font-semibold.text-gray-900 Información personal
+              p.text-xs.text-gray-400 Actualiza tu nombre y apellido
+
+          form(action="/cuenta/perfil" method="POST")
+            .grid.grid-cols-1.gap-4(class="sm:grid-cols-2")
+              div
+                label.block.text-sm.font-medium.text-gray-700.mb-1 Nombre
+                input(type="text" name="nombre" value=user.nombre required class="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 bg-gray-50 text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white transition-colors")
+              div
+                label.block.text-sm.font-medium.text-gray-700.mb-1 Apellido
+                input(type="text" name="apellido" value=user.apellido required class="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 bg-gray-50 text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white transition-colors")
+            .mt-4
+              label.block.text-sm.font-medium.text-gray-700.mb-1 Correo electrónico
+              input(type="email" value=user.email disabled class="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed")
+              p.text-xs.text-gray-400.mt-1 El correo no se puede cambiar
+            .mt-5.flex.justify-end
+              button(type="submit" class="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style="background:#1a7a4a") Guardar cambios
+
+        //- Seguridad
+        .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-6
+          .flex.items-center.gap-3.mb-5
+            .h-9.w-9.rounded-xl.flex.items-center.justify-center.shrink-0(style="background:#fef3c7")
+              svg(xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" style="color:#d97706" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z")
+            div
+              h3.text-base.font-semibold.text-gray-900 Seguridad
+              p.text-xs.text-gray-400 Cambia tu contraseña con verificación por correo
+
+          .flex.items-center.justify-between.p-4.rounded-xl(style="background:#f9fafb;border:1px solid #e5e7eb")
+            div
+              p.text-sm.font-medium.text-gray-700 Contraseña
+              p.text-xs.text-gray-400.mt-1 Te enviaremos un código de 6 dígitos a #{user.email}
+            a(
+              href="/cuenta/password"
+              class="px-4 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-90 shrink-0"
+              style="background:#fef3c7;color:#92400e"
+            ) Cambiar →

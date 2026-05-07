@@ -1,0 +1,140 @@
+include ../layout/header.pug
+include ../layout/navbar.pug
+include ../layout/sidebar.pug 
+
+block content
+  main.ml-0.pt-24.px-6.pb-8.min-h-screen.bg-gray-50(class="md:ml-64")
+
+    //- ── STAT CARDS ─────────────────────────────────────
+    .grid.grid-cols-1.gap-4.mb-6(class="sm:grid-cols-2 xl:grid-cols-4")
+
+      //- Tandas Activas
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-6.flex.items-center.gap-4
+        .h-12.w-12.rounded-xl.bg-gray-900.flex.items-center.justify-center.shrink-0
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z")
+        div
+          p.text-sm.text-gray-500.mb-1 Tandas Activas
+          p.text-3xl.font-bold.text-gray-900= stats.tandasActivas || 0
+
+      //- Total Miembros
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-6.flex.items-center.gap-4
+        .h-12.w-12.rounded-xl.bg-emerald-500.flex.items-center.justify-center.shrink-0
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z")
+        div
+          p.text-sm.text-gray-500.mb-1 Total Miembros
+          p.text-3xl.font-bold.text-gray-900= stats.totalMiembros || 0
+
+      //- Pagos Pendientes
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-6.flex.items-center.gap-4
+        .h-12.w-12.rounded-xl.bg-amber-400.flex.items-center.justify-center.shrink-0
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z")
+        div
+          p.text-sm.text-gray-500.mb-1 Pagos Pendientes
+          p.text-3xl.font-bold.text-gray-900= stats.pagosPendientes || 0
+
+      //- Próximo Pago
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-6.flex.items-center.gap-4
+        .h-12.w-12.rounded-xl.bg-purple-500.flex.items-center.justify-center.shrink-0
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z")
+        div
+          p.text-sm.text-gray-500.mb-1 Próximo Pago
+          if stats.proximaRonda
+            p.text-xl.font-bold.text-gray-900= new Date(stats.proximaRonda.fecha_pago).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })
+            p.text-xs.text-gray-400= stats.proximaRonda.miembro_nombre
+          else
+            p.text-3xl.font-bold.text-gray-900 —
+
+    //- ── BOTTOM GRID ─────────────────────────────────────
+    .grid.grid-cols-1.gap-6(class="lg:grid-cols-3")
+
+      //- Tandas Recientes table
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-6(class="lg:col-span-2")
+        .flex.items-center.justify-between.mb-6
+          h2.text-lg.font-semibold.text-gray-900 Tandas Recientes
+          a.text-sm.text-gray-500.flex.items-center.gap-1(href='/tandas' class="hover:text-emerald-600")
+            | Ver todas
+            svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7")
+
+        .overflow-x-auto
+          table.w-full.text-sm
+            thead
+              tr.border-b.border-gray-100
+                th.text-left.pb-3.text-gray-400.font-medium Nombre
+                th.text-left.pb-3.text-gray-400.font-medium Miembros
+                th.text-left.pb-3.text-gray-400.font-medium Monto
+                th.text-left.pb-3.text-gray-400.font-medium Frecuencia
+                th.text-left.pb-3.text-gray-400.font-medium Estado
+            tbody
+              if tandas && tandas.length
+                each tanda in tandas
+                  tr.border-b.border-gray-50(class="hover:bg-gray-50 transition-colors")
+                    td.py-3.font-medium.text-gray-800= tanda.nombre
+                    td.py-3.text-gray-600= tanda.miembros_actuales || 0
+                    td.py-3.text-gray-600 $#{Number(tanda.monto_aportacion).toLocaleString('es-MX')}
+                    td.py-3.text-gray-600= tanda.frecuencia.charAt(0).toUpperCase() + tanda.frecuencia.slice(1)
+                    td.py-3
+                      - let badgeColor = tanda.estado === 'activa' ? 'bg-emerald-100 text-emerald-700' : tanda.estado === 'pausada' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600'
+                      span(class=`px-2 py-1 rounded-full text-xs font-medium ${badgeColor}`)= tanda.estado.charAt(0).toUpperCase() + tanda.estado.slice(1)
+              else
+                tr
+                  td.py-6.text-center.text-gray-400.italic(colspan="5") No tienes tandas aún —
+                    a(href="/tandas/nueva" class="text-emerald-600 font-medium ml-1 hover:underline") Crear una
+
+      //- Donut chart
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-6
+        h2.text-lg.font-semibold.text-gray-900.mb-6 Estado de Pagos
+
+        .flex.flex-col.items-center.justify-center.h-48
+          .relative.flex.items-center.justify-center
+            canvas#donutChart(width="180" height="180")
+
+        .flex.items-center.justify-center.gap-4.mt-4.text-xs.text-gray-600
+          .flex.items-center.gap-1
+            span.h-3.w-3.rounded-full.bg-emerald-500.inline-block
+            | Pagados
+          .flex.items-center.gap-1
+            span.h-3.w-3.rounded-full.bg-amber-400.inline-block
+            | Pendientes
+          .flex.items-center.gap-1
+            span.h-3.w-3.rounded-full.bg-red-400.inline-block
+            | Faltantes
+
+block scripts
+  script(src="https://cdn.jsdelivr.net/npm/chart.js")
+  script.
+    // Data passed from dashboardController via res.locals
+    const pagados   = #{pagosSummary ? pagosSummary.pagados : 0}
+    const pendientes = #{pagosSummary ? pagosSummary.pendientes : 0}
+    const faltantes  = #{pagosSummary ? pagosSummary.faltantes : 0}
+
+    const total = pagados + pendientes + faltantes
+
+    const ctx = document.getElementById('donutChart').getContext('2d')
+
+    if (total > 0) {
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Pagados', 'Pendientes', 'Faltantes'],
+          datasets: [{
+            data: [pagados, pendientes, faltantes],
+            backgroundColor: ['#10B981', '#FBBF24', '#F87171'],
+            borderWidth: 0,
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          cutout: '70%',
+          plugins: { legend: { display: false } },
+          responsive: false
+        }
+      })
+      document.getElementById('donutChart').style.display = 'block'
+    } else {
+      document.getElementById('donutChart').style.display = 'none'
+    }

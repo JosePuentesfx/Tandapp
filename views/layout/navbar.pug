@@ -1,0 +1,240 @@
+include header.pug
+
+    style.
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        font-family: 'DM Sans', sans-serif;
+        background: #f4f6fb;
+        padding: 20px;
+      }
+
+      .topbar {
+        width: 80%;
+        height: 64px;
+        background: #ffffff;
+        border-bottom: 1px solid #e8ecf4;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 28px;
+        border-radius: 14px;
+        box-shadow: 0 2px 12px rgba(0,0,0,.06);
+        position: relative;
+        overflow: visible;
+      }
+
+      .topbar-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #111827;
+      }
+
+      .notif-wrapper {
+        position: relative;
+      }
+
+      .notif-btn {
+        position: relative;
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .notif-btn:hover { background: #f0f3fa; }
+
+      .notif-btn svg {
+        width: 22px;
+        height: 22px;
+        color: #374151;
+      }
+
+      .badge {
+        position: absolute;
+        top: 6px;
+        right: 7px;
+        width: 9px;
+        height: 9px;
+        background: #ef4444;
+        border-radius: 50%;
+        border: 2px solid #fff;
+      }
+
+      .notif-panel {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        width: 360px;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 8px 40px rgba(0,0,0,.13);
+        overflow: hidden;
+        z-index: 9999;
+
+        opacity: 0;
+        transform: translateY(-8px) scale(.97);
+        pointer-events: none;
+        transition: all .2s ease;
+      }
+
+      .notif-panel.open {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        pointer-events: auto;
+      }
+
+      .panel-header {
+        display: flex;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .mark-read {
+        font-size: .8rem;
+        color: #22c55e;
+        background: none;
+        border: none;
+        cursor: pointer;
+      }
+
+      .notif-list {
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .notif-item {
+        display: flex;
+        gap: 12px;
+        padding: 14px 20px;
+        border-bottom: 1px solid #f5f5f5;
+        position: relative;
+      }
+
+      .notif-item.unread { background: #f0fdf4; }
+
+      .notif-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .icon-green { background: #dcfce7; color: #16a34a; }
+      .icon-orange { background: #ffedd5; color: #ea580c; }
+      .icon-blue { background: #dbeafe; color: #2563eb; }
+
+      .notif-body p {
+        font-size: .82rem;
+        color: #374151;
+      }
+
+      .notif-time {
+        font-size: .73rem;
+        color: #9ca3af;
+      }
+
+      .unread-dot {
+        position: absolute;
+        top: 18px;
+        right: 16px;
+        width: 7px;
+        height: 7px;
+        background: #22c55e;
+        border-radius: 50%;
+      }
+
+      .panel-footer {
+        padding: 12px;
+        text-align: center;
+      }
+
+      .panel-footer a {
+        color: #22c55e;
+        text-decoration: none;
+      }
+
+  
+
+    .topbar
+      span.topbar-title Notificaciones
+
+      .notif-wrapper
+        button.notif-btn#notifBtn
+          svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+            path(d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9")
+            path(d="M13.73 21a2 2 0 0 1-3.46 0")
+          if unreadCount > 0
+            span.badge#badge
+
+        .notif-panel#notifPanel
+
+          .panel-header
+            h3 Notificaciones 
+              span(style="color:#9ca3af") (#{unreadCount})
+            button.mark-read#markRead Marcar todas
+
+          .notif-list
+            if notificaciones && notificaciones.length > 0
+              each notif in notificaciones
+                .notif-item(class=notif.leida ? '' : 'unread')
+                  .notif-icon(class=notif.tipo === 'alerta' ? 'icon-orange' : (notif.tipo === 'tanda' ? 'icon-green' : 'icon-blue'))
+                    if notif.tipo === 'alerta'
+                      | !
+                    else if notif.tipo === 'tanda'
+                      | ✓
+                    else
+                      | 👤
+                  .notif-body
+                    p 
+                      strong= notif.titulo
+                    p= notif.mensaje
+                    - const timeAgo = new Date(notif.created_at).toLocaleDateString('es-MX', {day: 'numeric', month: 'short'})
+                    span.notif-time= timeAgo
+                  if !notif.leida
+                    span.unread-dot
+            else
+              .notif-item
+                .notif-body
+                  p No tienes notificaciones nuevas.
+
+    script.
+      const btn = document.getElementById('notifBtn');
+      const panel = document.getElementById('notifPanel');
+      const badge = document.getElementById('badge');
+      const markReadBtn = document.getElementById('markRead');
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        panel.classList.toggle('open');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!panel.contains(e.target) && !btn.contains(e.target)) {
+          panel.classList.remove('open');
+        }
+      });
+
+      markReadBtn.addEventListener('click', async () => {
+        try {
+          const res = await fetch('/notificaciones/marcar-leidas', { method: 'POST' });
+          if(res.ok) {
+            document.querySelectorAll('.notif-item.unread').forEach(item => {
+              item.classList.remove('unread');
+              const dot = item.querySelector('.unread-dot');
+              if (dot) dot.remove();
+            });
+            if(badge) badge.style.display = 'none';
+          }
+        } catch(e) {
+          console.error(e);
+        }
+      });

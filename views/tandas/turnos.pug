@@ -1,0 +1,283 @@
+include ../layout/header.pug
+include ../layout/navbar.pug
+include ../layout/sidebar.pug 
+
+
+
+block content
+  main(class="ml-0 pt-24 px-6 pb-8 min-h-screen bg-gray-50 md:ml-64")
+
+    //- ── HEADER ──────────────────────────────────────────
+    div(class="mb-6")
+      div(class="flex items-center gap-2 text-sm text-gray-400 mb-2")
+        a(href="/tandas" class="hover:text-gray-600 transition-colors") Tandas
+        span /
+        span(class="text-gray-600 font-medium")= tanda.nombre
+      h1(class="text-2xl font-bold text-gray-900") Asignar Turnos
+      p(class="text-sm text-gray-400 mt-1") Paso 3 de 3 — Define quién recibe en cada ronda
+
+    //- ── PROGRESS STEPS ──────────────────────────────────
+    div(class="flex items-center gap-0 mb-8 max-w-lg")
+      div(class="flex items-center gap-2")
+        div(class="w-8 h-8 rounded-full bg-emerald-500 text-white text-sm font-bold flex items-center justify-center")
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7")
+        span(class="text-sm font-semibold text-emerald-600") Tanda
+      div(class="flex-1 h-0.5 bg-emerald-500 mx-3")
+      div(class="flex items-center gap-2")
+        div(class="w-8 h-8 rounded-full bg-emerald-500 text-white text-sm font-bold flex items-center justify-center")
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7")
+        span(class="text-sm font-semibold text-emerald-600") Miembros
+      div(class="flex-1 h-0.5 bg-emerald-500 mx-3")
+      div(class="flex items-center gap-2")
+        div(class="w-8 h-8 rounded-full bg-emerald-500 text-white text-sm font-bold flex items-center justify-center") 3
+        span(class="text-sm font-semibold text-emerald-600") Turnos
+
+    //- ── FLASH ───────────────────────────────────────────
+    if error && error.length
+      div(class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 mb-5")= error
+
+    //- ── MODE SELECTOR ───────────────────────────────────
+    div(class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6")
+      h2(class="text-base font-semibold text-gray-800 mb-4") ¿Cómo quieres asignar los turnos?
+
+      div(class="grid grid-cols-1 gap-3 sm:grid-cols-3")
+
+        //- Manual
+        button(
+          type="button"
+          onclick="setMode('manual')"
+          id="btn-manual"
+          class="mode-btn flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50 transition-all"
+        )
+          div(class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center")
+            svg(xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z")
+          p(class="text-sm font-semibold text-gray-800") Manual
+          p(class="text-xs text-gray-400 text-center") Tú decides el orden de todos
+
+        //- Random
+        button(
+          type="button"
+          onclick="setMode('random')"
+          id="btn-random"
+          class="mode-btn flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-gray-200 bg-white transition-all"
+        )
+          div(class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center")
+            svg(xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15")
+          p(class="text-sm font-semibold text-gray-800") Aleatorio
+          p(class="text-xs text-gray-400 text-center") El sistema sortea automáticamente
+
+        //- Mixed
+        button(
+          type="button"
+          onclick="setMode('mixed')"
+          id="btn-mixed"
+          class="mode-btn flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-gray-200 bg-white transition-all"
+        )
+          div(class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center")
+            svg(xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4")
+          p(class="text-sm font-semibold text-gray-800") Mixto
+          p(class="text-xs text-gray-400 text-center") Fija algunos y sortea el resto
+
+    //- ── TURN ASSIGNMENT FORM ────────────────────────────
+    form(action=`/tandas/${tanda.id}/asignar-turnos` method="POST")
+      input(type="hidden" name="modo" id="modoInput" value="manual")
+
+      div(class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6")
+
+        //- Table header
+        div(class="px-6 py-4 border-b border-gray-100 flex items-center justify-between")
+          h2(class="text-base font-semibold text-gray-800") Orden de turnos
+          div(class="flex items-center gap-2")
+            //- Random button (shows in random + mixed mode)
+            button(
+              type="button"
+              id="btnRandomize"
+              onclick="randomizeAll()"
+              class="hidden items-center gap-1 text-sm text-gray-500 hover:text-emerald-600 border border-gray-200 hover:border-emerald-300 px-3 py-1 rounded-lg transition-all"
+            )
+              svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15")
+              | Sortear restantes
+
+        //- Members list with turn inputs
+        ul(class="divide-y divide-gray-50" id="membersList")
+          each miembro, index in miembros
+            li(class="flex items-center gap-4 px-6 py-4" id=`row-${miembro.id}`)
+
+              //- Avatar
+              div(class="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 text-sm font-bold flex items-center justify-center flex-shrink-0")
+                = miembro.nombre.charAt(0).toUpperCase()
+
+              //- Name
+              div(class="flex-1")
+                p(class="text-sm font-semibold text-gray-800")= miembro.nombre
+                p(class="text-xs text-gray-400")= miembro.telefono || 'Sin teléfono'
+
+              //- Lock checkbox (only in mixed mode)
+              div(class="hidden items-center gap-1 lock-control" id=`lock-${miembro.id}`)
+                label(for=`lock-cb-${miembro.id}` class="text-xs text-gray-400 cursor-pointer") Fijar
+                input(
+                  type="checkbox"
+                  id=`lock-cb-${miembro.id}`
+                  class="lock-checkbox cursor-pointer"
+                  data-id=miembro.id
+                  onchange=`toggleLock(${miembro.id})`
+                )
+
+              //- Turn number input
+              div(class="flex items-center gap-2")
+                span(class="text-xs text-gray-400") Turno
+                input(
+                  type="number"
+                  name=`turnos[${miembro.id}]`
+                  id=`turno-${miembro.id}`
+                  value=index + 1
+                  min="1"
+                  max=miembros.length
+                  class="w-16 border border-gray-200 rounded-lg px-2 py-1 text-sm text-center text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  data-miembro-id=miembro.id
+                )
+
+        //- Info banner
+        div(class="px-6 py-3 bg-amber-50 border-t border-amber-100" id="mixedHint" style="display:none")
+          p(class="text-xs text-amber-700")
+            | 💡 Marca "Fijar" en los miembros cuyo turno quieres mantener. El resto se sortearán automáticamente al presionar "Sortear restantes".
+
+      //- ── SUBMIT ──────────────────────────────────────────
+      div(class="flex items-center justify-between")
+        a(href=`/tandas/${tanda.id}/miembros` class="text-sm text-gray-400 hover:text-gray-600 transition-colors") Regresar
+
+        button(
+          type="submit"
+          class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-colors"
+        )
+          | Confirmar y generar tanda
+          svg(xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7")
+
+block scripts
+  script.
+    const totalMiembros = !{JSON.stringify(miembros.length)}
+    const miembroIds = !{JSON.stringify(miembros.map(m => m.id))}
+    let currentMode = 'manual'
+
+    // ── MODE SWITCHING ────────────────────────────────────
+    function setMode(mode) {
+      currentMode = mode
+      document.getElementById('modoInput').value = mode
+
+      // Update button styles
+      document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.classList.remove('border-emerald-500', 'bg-emerald-50')
+        btn.classList.add('border-gray-200', 'bg-white')
+        btn.querySelector('.w-10').classList.remove('bg-emerald-100')
+        btn.querySelector('.w-10').classList.add('bg-gray-100')
+        btn.querySelector('svg').classList.remove('text-emerald-600')
+        btn.querySelector('svg').classList.add('text-gray-500')
+      })
+
+      const activeBtn = document.getElementById(`btn-${mode}`)
+      activeBtn.classList.add('border-emerald-500', 'bg-emerald-50')
+      activeBtn.classList.remove('border-gray-200', 'bg-white')
+      activeBtn.querySelector('.w-10').classList.add('bg-emerald-100')
+      activeBtn.querySelector('.w-10').classList.remove('bg-gray-100')
+      activeBtn.querySelector('svg').classList.add('text-emerald-600')
+      activeBtn.querySelector('svg').classList.remove('text-gray-500')
+
+      // Show/hide lock controls
+      const lockControls = document.querySelectorAll('.lock-control')
+      lockControls.forEach(el => {
+        el.style.display = mode === 'mixed' ? 'flex' : 'none'
+      })
+
+      // Show/hide randomize button
+      const btnRandomize = document.getElementById('btnRandomize')
+      if (mode === 'random' || mode === 'mixed') {
+        btnRandomize.classList.remove('hidden')
+        btnRandomize.classList.add('flex')
+      } else {
+        btnRandomize.classList.add('hidden')
+        btnRandomize.classList.remove('flex')
+      }
+
+      // Show mixed hint
+      document.getElementById('mixedHint').style.display = mode === 'mixed' ? 'block' : 'none'
+
+      // Auto randomize if random mode selected
+      if (mode === 'random') randomizeAll()
+    }
+
+    // ── RANDOMIZE ─────────────────────────────────────────
+    function randomizeAll() {
+      // Get which ones are locked (mixed mode)
+      const lockedTurnos = {}
+      if (currentMode === 'mixed') {
+        document.querySelectorAll('.lock-checkbox:checked').forEach(cb => {
+          const id = cb.dataset.id
+          lockedTurnos[id] = parseInt(document.getElementById(`turno-${id}`).value)
+        })
+      }
+
+      // Get available turn numbers (not locked)
+      const usedTurnos = new Set(Object.values(lockedTurnos))
+      const available = []
+      for (let i = 1; i <= totalMiembros; i++) {
+        if (!usedTurnos.has(i)) available.push(i)
+      }
+
+      // Shuffle available turns
+      for (let i = available.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [available[i], available[j]] = [available[j], available[i]]
+      }
+
+      // Assign shuffled turns to unlocked members
+      let availIdx = 0
+      miembroIds.forEach(id => {
+        if (!lockedTurnos[id]) {
+          document.getElementById(`turno-${id}`).value = available[availIdx++]
+        }
+      })
+    }
+
+    // ── TOGGLE LOCK ───────────────────────────────────────
+    function toggleLock(id) {
+      const input = document.getElementById(`turno-${id}`)
+      const isLocked = document.getElementById(`lock-cb-${id}`).checked
+      input.disabled = !isLocked
+      input.classList.toggle('bg-gray-50', !isLocked)
+      input.classList.toggle('text-gray-300', !isLocked)
+    }
+
+    // ── VALIDATE + DOUBLE SUBMIT PROTECTION ──────────────
+    const submitBtn = document.querySelector('form button[type="submit"]')
+    let submitted = false
+
+    document.querySelector('form').addEventListener('submit', (e) => {
+      // Validate no duplicate turns first
+      const values = []
+      miembroIds.forEach(id => {
+        values.push(parseInt(document.getElementById(`turno-${id}`).value))
+      })
+      const unique = new Set(values)
+      if (unique.size !== values.length) {
+        e.preventDefault()
+        alert('Hay turnos duplicados. Asegúrate que cada miembro tenga un turno diferente.')
+        return
+      }
+
+      // Prevent double submit
+      if (submitted) {
+        e.preventDefault()
+        return
+      }
+      submitted = true
+      submitBtn.disabled = true
+      submitBtn.textContent = 'Generando...'
+      submitBtn.classList.add('opacity-75', 'cursor-not-allowed')
+    })

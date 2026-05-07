@@ -1,0 +1,65 @@
+include ../layout/header.pug
+include ../layout/homepagenav.pug
+
+.homepage-layout.min-h-screen.flex.flex-col
+  main.flex-1.w-full
+    section#inicio.flex.flex-col.justify-center.px-6.pt-32.pb-20.min-h-screen.scroll-mt-24(
+      style="background-image: linear-gradient(rgba(255, 255, 255, 0.79), rgba(18, 73, 49, 0.35)), url('/img/homepage-bg.png'); background-size: cover; background-position: center; background-repeat: no-repeat;"
+    )
+      .max-w-3xl.mx-auto.text-center
+        h1.text-4xl.font-bold.text-gray-900.mb-5(class="sm:text-6xl") Empieza a agilizar tus tandas!
+        p.text-gray-900.mb-1.font-semibold Administra tus tandas de una forma sencilla y rápida.
+        p.text-gray-900.mb-8.font-semibold ¡No más lápiz y papel!
+        .flex.flex-wrap.gap-4.justify-center.pt-2
+          a.inline-flex.items-center.rounded-xl.ring-2.ring-emerald-200.bg-emerald-600.font-large.text-white(class="py-2.5 px-5 transition-all duration-300 hover:bg-emerald-700" href="/register") Crea tus propias tandas ahora!
+
+    section#acerca.scroll-mt-24.py-16.px-6.bg-white.border-t.border-emerald-100
+      .max-w-3xl.mx-auto
+        h2.text-3xl.font-bold.text-gray-900.mb-6.text-center Acerca de TandApp
+        p.text-gray-800.text-center.leading-relaxed TandApp es una aplicación web que te permite administrar tus tandas de forma ordenada: miembros, turnos, pagos y seguimiento en un solo lugar. Ayudandote a mantener un orden, tus tandas, a tu modo.
+
+    section#funciones.scroll-mt-24.py-16.px-6.bg-emerald-50
+      .max-w-7xl.mx-auto
+        h2.text-3xl.font-bold.text-gray-900.mb-10.text-center Lo que puedes hacer
+        .grid.gap-8(class="sm:grid-cols-2 lg:grid-cols-3")
+          article.rounded-2xl.bg-white.p-6.shadow-sm.border.border-emerald-100
+            h3.text-lg.font-bold.text-emerald-900.mb-2 Tandas
+            p.text-sm.text-gray-700 Crea y gestiona tandas con fechas, montos y estado claro para todos.
+          article.rounded-2xl.bg-white.p-6.shadow-sm.border.border-emerald-100
+            h3.text-lg.font-bold.text-emerald-900.mb-2 Miembros y turnos
+            p.text-sm.text-gray-700 Registra participantes y asigna turnos sin confusiones.
+          article.rounded-2xl.bg-white.p-6.shadow-sm.border.border-emerald-100
+            h3.text-lg.font-bold.text-emerald-900.mb-2 Pagos
+            p.text-sm.text-gray-700 Lleva el control de lo pagado, pendiente y faltante.
+
+    section#como-empezar.scroll-mt-24.py-16.px-6.bg-white.border-t.border-emerald-100
+      .max-w-3xl.mx-auto
+        h2.text-3xl.font-bold.text-gray-900.mb-8.text-center Cómo empezar
+        ol.space-y-4.text-gray-800
+          li.flex.gap-3
+            span.flex.h-8.w-8.shrink-0.items-center.justify-center.rounded-full.bg-emerald-600.text-sm.font-bold.text-white 1
+            span Crea una cuenta gratuita con tu correo.
+          li.flex.gap-3
+            span.flex.h-8.w-8.shrink-0.items-center.justify-center.rounded-full.bg-emerald-600.text-sm.font-bold.text-white 2
+            span Configura tu primera tanda y agrega miembros.
+          li.flex.gap-3
+            span.flex.h-8.w-8.shrink-0.items-center.justify-center.rounded-full.bg-emerald-600.text-sm.font-bold.text-white 3
+            span Asigna turnos y registra los pagos en cada ronda.
+
+    section#cta.scroll-mt-24.py-14.px-6.bg-emerald-600
+      .max-w-3xl.mx-auto.text-center
+        h2.text-2xl.font-bold.text-white.mb-4 ¿Listo para organizar tus tandas?
+        p.text-emerald-100.mb-6 Regístrate y empieza en minutos.
+        a.inline-flex.items-center.rounded-xl.bg-white.px-6.font-semibold.text-emerald-800(class="py-3 hover:bg-emerald-50" href="/register") Crear cuenta
+
+  footer.shrink-0.border-t.border-emerald-200.bg-emerald-50
+    .max-w-7xl.mx-auto.px-6.py-10
+      p.text-center.text-sm.text-emerald-800 TandApp 2026 © - Todos los derechos reservados.
+      p.text-center.text-sm.text-emerald-800.mt-2
+        a.text-emerald-800(class="hover:underline" href="#inicio") Inicio
+        |  · 
+        a.text-emerald-800(class="hover:underline" href="#acerca") Acerca
+        |  · 
+        a.text-emerald-800(class="hover:underline" href="#funciones") Funciones
+        |  · 
+        a.text-emerald-800(class="hover:underline" href="#como-empezar") Cómo empezar
