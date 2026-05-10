@@ -8,10 +8,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/Angelfinn12/TandasProyecto.git"
+    "url": "git+ssh://git@github.com/JosePuentesfx/Tandapp"
   },
   "license": "ISC",
-  "author": "Fishmen",
+  "author": "Jose Puentes Flores",
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
